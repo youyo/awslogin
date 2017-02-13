@@ -1,0 +1,17 @@
+#
+.env*
+my.cnf
+.wercker/
+__*
+*.exe
+*.test
+*.prof
+*.swp
+tmp/
+*.zip
+Vagrantfile
+.vagrant/
+dist/
+vendor/*
+!vendor/vendor.json
+awslogin
