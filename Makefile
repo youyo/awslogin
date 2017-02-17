@@ -36,7 +36,7 @@ test: deps
 
 ## Build
 build: deps
-	gox -osarch="darwin/amd64 linux/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/{{.OS}}_{{.Arch}}/$(Name)"
+	gox -osarch="darwin/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/{{.OS}}_{{.Arch}}/$(Name)"
 
 ## Build
 build-local: deps
