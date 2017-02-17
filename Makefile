@@ -50,7 +50,6 @@ install: deps
 release: build
 	mkdir -p pkg/release
 	zip -j pkg/release/$(Name)_darwin_amd64.zip pkg/darwin_amd64/$(Name)
-	zip -j pkg/release/$(Name)_linux_amd64.zip pkg/linux_amd64/$(Name)
 	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
 
 ## Show help
