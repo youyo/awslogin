@@ -43,7 +43,7 @@ func TestBuildSigninUrl(t *testing.T) {
 }
 
 func TestNewSession(t *testing.T) {
-	_, err := newSession()
+	_, err := newSession("default")
 	var expected error = nil
 	if err != nil {
 		t.Errorf("expected %v to eq %v", err, expected)

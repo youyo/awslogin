@@ -41,8 +41,8 @@
 		{
 			"checksumSHA1": "4+UewCuNeKXBiszt4pn/3e4kpoY=",
 			"path": "github.com/aws/aws-sdk-go/aws/credentials",
-			"revision": "2d3b3bc3aae6a09a9b194aa6eb71326fcbe2e918",
-			"revisionTime": "2017-02-16T22:28:40Z"
+			"revision": "ab16e115479efb695e122bc4bb3e0ad52419d1ba",
+			"revisionTime": "2017-02-20T21:49:16Z"
 		},
 		{
 			"checksumSHA1": "vNezRqMaW2P4eroQOw+X8VvdRLk=",

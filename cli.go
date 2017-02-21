@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/go-ini/ini"
@@ -58,6 +59,7 @@ func (cli *CLI) Run(args []string) int {
 		rolename string
 		list     bool
 		version  bool
+		profile  string
 	)
 
 	// Define option flag parse
@@ -69,6 +71,7 @@ func (cli *CLI) Run(args []string) int {
 	flags.BoolVar(&list, "l", false, "Print available ARN list and quit. (Short)")
 	flags.BoolVar(&version, "version", false, "Print version information and quit.")
 	flags.BoolVar(&version, "v", false, "Print version information and quit. (Short)")
+	flags.StringVar(&profile, "profile", "default", "Use default profile.")
 
 	// Parse commandline flag
 	if err := flags.Parse(args[1:]); err != nil {
@@ -105,7 +108,7 @@ func (cli *CLI) Run(args []string) int {
 	}
 
 	// new service
-	s, err := newSession()
+	s, err := newSession(profile)
 	if err != nil {
 		fmt.Fprintf(cli.errStream, "Could not start new session.\n")
 		return ExitCodeError
@@ -165,8 +168,9 @@ func versionCheck() {
 	}
 }
 
-func newSession() (s *session.Session, err error) {
-	s, err = session.NewSession(&aws.Config{})
+func newSession(p string) (s *session.Session, err error) {
+	cred := credentials.NewSharedCredentials("", p)
+	s, err = session.NewSession(&aws.Config{Credentials: cred})
 	return
 }
 
