@@ -67,7 +67,7 @@ Press '+_', you can select arn.
 - Install awslogin command
 
 ```bash
-$ wget https://github.com/youyo/awslogin/releases/download/$latest_version/awslogin_darwin_amd64.zip
+$ wget `curl -s https://api.github.com/repos/youyo/awslogin/releases/latest | jq -r ".assets[0].browser_download_url"`
 $ unzip awslogin_darwin_amd64.zip
 ```
 
