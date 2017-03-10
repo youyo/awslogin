@@ -2,7 +2,10 @@ package main
 
 import "os"
 
+// Name of this program
 var Name string
+
+// Version of this program
 var Version string
 
 func main() {

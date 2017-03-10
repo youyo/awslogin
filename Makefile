@@ -13,11 +13,6 @@ setup:
 deps: setup
 	govendor sync
 
-## Initialize and Update dependencies
-update: setup
-	rm -rf /vendor/vendor.json
-	govendor fetch +outside
-
 ## Vet
 vet: setup
 	govendor vet +local
