@@ -236,7 +236,7 @@ func fetchArn(cfg *ini.File, roleName string) (arn string, err error) {
 	s := "profile " + roleName
 	arn = cfg.Section(s).Key("role_arn").String()
 	if arn == "" {
-		return "", errors.New("Could not fetch Arn.")
+		return "", errors.New("Could not fetch Arn")
 	}
 	return
 }
