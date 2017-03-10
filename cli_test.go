@@ -34,8 +34,8 @@ func TestCheckArgRoleName(t *testing.T) {
 	}
 }
 
-func TestBuildSigninUrl(t *testing.T) {
-	u := buildSigninUrl("siginin-token")
+func TestBuildSigninURL(t *testing.T) {
+	u := buildSigninURL("siginin-token")
 	expected := "https://signin.aws.amazon.com/federation?Action=login&Destination=https%3A%2F%2Fconsole.aws.amazon.com%2F&Issuer=https%3A%2F%2Fgithub.com%2Fyouyo%2Fawslogin%2F&SigninToken=siginin-token"
 	if u != expected {
 		t.Errorf("expected %v to eq %v", u, expected)
@@ -44,14 +44,14 @@ func TestBuildSigninUrl(t *testing.T) {
 
 func TestNewSession(t *testing.T) {
 	_, err := newSession("default")
-	var expected error = nil
+	var expected error
 	if err != nil {
 		t.Errorf("expected %v to eq %v", err, expected)
 	}
 }
 
-func TestBuildSigninTokenRequestUrl(t *testing.T) {
-	u := buildSigninTokenRequestUrl("faderated-token")
+func TestBuildSigninTokenRequestURL(t *testing.T) {
+	u := buildSigninTokenRequestURL("faderated-token")
 	expected := "https://signin.aws.amazon.com/federation?Action=getSigninToken&Session=faderated-token&SessionType=json"
 	if u != expected {
 		t.Errorf("expected %v to eq %v", u, expected)
@@ -68,7 +68,7 @@ func TestConfigPath(t *testing.T) {
 
 func TestLoadConfig(t *testing.T) {
 	_, err := loadConfig("./tests/config")
-	var expected error = nil
+	var expected error
 	if err != nil {
 		t.Errorf("expected %v to eq %v", err, expected)
 	}
@@ -87,7 +87,7 @@ func TestAvailableArn(t *testing.T) {
 func TestFetchArn(t *testing.T) {
 	cfg, _ := loadConfig("./tests/config")
 	_, err := fetchArn(cfg, "test")
-	var expected error = nil
+	var expected error
 	if err != nil {
 		t.Errorf("expected %v to eq %v", err, expected)
 	}

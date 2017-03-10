@@ -38,17 +38,17 @@ type CLI struct {
 }
 
 type (
-	Service struct {
+	service struct {
 		*sts.STS
 	}
 
-	FederatedSession struct {
+	federatedSession struct {
 		SessionID    string `json:"sessionId"`
 		SessionKey   string `json:"sessionKey"`
 		SessionToken string `json:"sessionToken"`
 	}
 
-	SigninToken struct {
+	signinToken struct {
 		Token string `json:"SigninToken"`
 	}
 )
@@ -174,12 +174,12 @@ func newSession(p string) (s *session.Session, err error) {
 	return
 }
 
-func newService(s *session.Session) (svc *Service) {
-	svc = &Service{sts.New(s)}
+func newService(s *session.Session) (svc *service) {
+	svc = &service{sts.New(s)}
 	return
 }
 
-func (svc *Service) assumeRole(roleName, arn string) (resp *sts.AssumeRoleOutput, err error) {
+func (svc *service) assumeRole(roleName, arn string) (resp *sts.AssumeRoleOutput, err error) {
 	params := &sts.AssumeRoleInput{
 		RoleArn:         aws.String(arn),
 		RoleSessionName: aws.String(roleName),
@@ -206,7 +206,7 @@ func requestSigninToken(url string) (st string, err error) {
 	if err != nil {
 		return "", err
 	}
-	var ST SigninToken
+	var ST signinToken
 	json.Unmarshal(body, &ST)
 	return ST.Token, nil
 }
@@ -242,7 +242,7 @@ func fetchArn(cfg *ini.File, roleName string) (arn string, err error) {
 }
 
 func buildFederatedSession(resp *sts.AssumeRoleOutput) (j string, err error) {
-	fs := &FederatedSession{
+	fs := &federatedSession{
 		SessionID:    *resp.Credentials.AccessKeyId,
 		SessionKey:   *resp.Credentials.SecretAccessKey,
 		SessionToken: *resp.Credentials.SessionToken,
