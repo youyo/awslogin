@@ -27,7 +27,7 @@ const (
 	ExitCodeOK    int = 0
 	ExitCodeError int = 1 + iota
 
-	SigninBaseUrl string = "https://signin.aws.amazon.com/federation"
+	SigninBaseURL string = "https://signin.aws.amazon.com/federation"
 )
 
 // CLI is the command line object
@@ -43,7 +43,7 @@ type (
 	}
 
 	FederatedSession struct {
-		SessionId    string `json:"sessionId"`
+		SessionID    string `json:"sessionId"`
 		SessionKey   string `json:"sessionKey"`
 		SessionToken string `json:"sessionToken"`
 	}
@@ -133,7 +133,7 @@ func (cli *CLI) Run(args []string) int {
 	fs, err := buildFederatedSession(resp)
 
 	// request Signin Token
-	url := buildSigninTokenRequestUrl(fs)
+	url := buildSigninTokenRequestURL(fs)
 	st, err := requestSigninToken(url)
 	if err != nil {
 		fmt.Fprintf(cli.errStream, "%s.\n", err)
@@ -141,7 +141,7 @@ func (cli *CLI) Run(args []string) int {
 	}
 
 	// build signin url
-	url = buildSigninUrl(st)
+	url = buildSigninURL(st)
 
 	// open browse
 	err = open.Start(url)
@@ -187,12 +187,12 @@ func (svc *Service) assumeRole(roleName, arn string) (resp *sts.AssumeRoleOutput
 	return svc.AssumeRole(params)
 }
 
-func buildSigninTokenRequestUrl(fs string) (u string) {
+func buildSigninTokenRequestURL(fs string) (u string) {
 	values := url.Values{}
 	values.Add("Action", "getSigninToken")
 	values.Add("SessionType", "json")
 	values.Add("Session", fs)
-	u = SigninBaseUrl + "?" + values.Encode()
+	u = SigninBaseURL + "?" + values.Encode()
 	return
 }
 
@@ -243,7 +243,7 @@ func fetchArn(cfg *ini.File, roleName string) (arn string, err error) {
 
 func buildFederatedSession(resp *sts.AssumeRoleOutput) (j string, err error) {
 	fs := &FederatedSession{
-		SessionId:    *resp.Credentials.AccessKeyId,
+		SessionID:    *resp.Credentials.AccessKeyId,
 		SessionKey:   *resp.Credentials.SecretAccessKey,
 		SessionToken: *resp.Credentials.SessionToken,
 	}
@@ -252,13 +252,13 @@ func buildFederatedSession(resp *sts.AssumeRoleOutput) (j string, err error) {
 	return
 }
 
-func buildSigninUrl(st string) (u string) {
+func buildSigninURL(st string) (u string) {
 	values := url.Values{}
 	values.Add("Action", "login")
 	values.Add("Issuer", "https://github.com/youyo/awslogin/")
 	values.Add("Destination", "https://console.aws.amazon.com/")
 	values.Add("SigninToken", st)
-	u = SigninBaseUrl + "?" + values.Encode()
+	u = SigninBaseURL + "?" + values.Encode()
 	return
 }
 
