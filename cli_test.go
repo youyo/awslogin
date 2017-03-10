@@ -98,6 +98,13 @@ func TestRun_listFlag(t *testing.T) {
 	cli := &CLI{outStream: outStream, errStream: errStream}
 	args := strings.Split("./awslogin -list", " ")
 	expected := 0
+	if _, exist := os.Stat(filepath.Join(os.Getenv("HOME"), ".aws/config")); exist != nil {
+		p := filepath.Join(os.Getenv("HOME"), ".aws")
+		f := filepath.Join(os.Getenv("HOME"), ".aws/config")
+		_ = os.Mkdir(p, 0700)
+		c, _ := os.Create(f)
+		c.Close()
+	}
 	status := cli.Run(args)
 	if status != expected {
 		t.Errorf("expected %v to eq %v", status, expected)
