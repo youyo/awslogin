@@ -47,7 +47,7 @@ release: build
 	for arch in "darwin_amd64" "linux_amd64"; do \
 		zip -j pkg/release/$(Name)_$$arch.zip pkg/$$arch/$(Name); \
 	done
-	#ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
+	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
 
 ## Show help
 help:
