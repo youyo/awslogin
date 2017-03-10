@@ -31,11 +31,11 @@ test: deps
 
 ## Build
 build: deps
-	gox -osarch="darwin/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/{{.OS}}_{{.Arch}}/$(Name)"
+	gox -osarch="darwin/amd64 linux/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/{{.OS}}_{{.Arch}}/$(Name)"
 
 ## Build
 build-local: deps
-	go build -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)" -o $(Name)
+	go build -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)" -o __$(Name)
 
 ## Install
 install: deps
@@ -44,11 +44,13 @@ install: deps
 ## Release
 release: build
 	mkdir -p pkg/release
-	zip -j pkg/release/$(Name)_darwin_amd64.zip pkg/darwin_amd64/$(Name)
-	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
+	for arch in "darwin_amd64" "linux_amd64"; do \
+		zip -j pkg/release/$(Name)_$$arch.zip pkg/$$arch/$(Name); \
+	done
+	#ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
 
 ## Show help
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps update vet lint test build build-local install release help
+.PHONY: setup deps vet lint test build build-local install release help
