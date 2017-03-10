@@ -1,0 +1,27 @@
+test:
+  box:
+    id: youyo/gobuild:latest
+    cmd: /bin/bash
+  steps:
+    - wercker/setup-go-workspace:
+      package-dir: github.com/youyo/awslogin
+    - script:
+      name: Lint
+      code: |-
+        make lint
+    - script:
+      name: Tests
+      code: |-
+        make test
+
+release:
+  box:
+    id: youyo/gobuild:latest
+    cmd: /bin/bash
+  steps:
+    - wercker/setup-go-workspace:
+      package-dir: github.com/youyo/awslogin
+    - script:
+      name: Releases
+      code: |-
+        make release
