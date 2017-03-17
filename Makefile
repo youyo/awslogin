@@ -31,7 +31,7 @@ test: deps
 
 ## Build
 build: deps
-	gox -osarch="darwin/amd64 linux/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/{{.OS}}_{{.Arch}}/$(Name)"
+	gox -osarch="darwin/amd64 linux/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/$(Name)_{{.OS}}_{{.Arch}}"
 
 ## Build
 build-local: deps
@@ -43,11 +43,10 @@ install: deps
 
 ## Release
 release: build
-	mkdir -p pkg/release
 	for arch in "darwin_amd64" "linux_amd64"; do \
-		zip -j pkg/release/$(Name)_$$arch.zip pkg/$$arch/$(Name); \
-	done
-	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/release/
+		zip -j pkg/$(Name)_$$arch.zip pkg/$(Name)_$$arch; \
+		done
+	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/
 
 ## Show help
 help:
