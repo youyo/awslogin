@@ -13,6 +13,9 @@ test:
       name: Tests
       code: |-
         make test
+  after-steps:
+    - slack-notifier:
+      url: ${SLACK_URL}
 
 release:
   box:
@@ -25,3 +28,6 @@ release:
       name: Releases
       code: |-
         make release
+  after-steps:
+    - slack-notifier:
+      url: ${SLACK_URL}

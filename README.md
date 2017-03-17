@@ -64,10 +64,11 @@ Press '+_', you can select arn.
 
 - Configure AWS CLI [default profile]. http://docs.aws.amazon.com/streams/latest/dev/kinesis-tutorial-cli-installation.html#config-cli
 - Configure using Assume role. http://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html
+- If use to MFA, please set `mfa_serial` parameter.
 - Install awslogin command
 
 ```bash
-$ wget `curl -s https://api.github.com/repos/youyo/awslogin/releases/latest | jq -r ".assets[0].browser_download_url"`
+$ curl -sLO `curl -s 'http://grl.i-o.sh/youyo/awslogin?suffix=darwin_amd64.zip'`
 $ unzip awslogin_darwin_amd64.zip
 ```
 

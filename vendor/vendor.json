@@ -3,6 +3,12 @@
 	"ignore": "",
 	"package": [
 		{
+			"checksumSHA1": "gu7nWZcOonz45dDZroBNNK7THm4=",
+			"path": "github.com/Songmu/prompter",
+			"revision": "f49666b0047d12850875d771340e1d862d9e7a0c",
+			"revisionTime": "2015-07-27T04:03:49Z"
+		},
+		{
 			"checksumSHA1": "Zd+eLWeqwbe1VNPQGMQAJErfAiM=",
 			"path": "github.com/aws/aws-sdk-go/aws",
 			"revision": "2d3b3bc3aae6a09a9b194aa6eb71326fcbe2e918",
@@ -303,6 +309,12 @@
 			"revisionTime": "2016-12-28T00:43:38Z"
 		},
 		{
+			"checksumSHA1": "xiboM3aeTebmyD7j6tl1psCJ+6o=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "57fdcb988a5c543893cc61bce354a6e24ab70022",
+			"revisionTime": "2017-03-07T16:30:44Z"
+		},
+		{
 			"checksumSHA1": "RZOdTSZN/PgcTqko5LzIAzw+UT4=",
 			"path": "github.com/pmezard/go-difflib/difflib",
 			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
@@ -369,6 +381,12 @@
 			"revisionTime": "2017-02-02T13:54:06Z"
 		},
 		{
+			"checksumSHA1": "Ep7z+7HBjNGA+aQa3XBRYQ9GYfE=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "728b753d0135da6801d45a38e6f43ff55779c5c2",
+			"revisionTime": "2017-01-24T01:46:54Z"
+		},
+		{
 			"checksumSHA1": "dcOJtT2YpM6/qNQUa+IGGjFUy0k=",
 			"path": "golang.org/x/net/html",
 			"revision": "b4690f45fa1cafc47b1c280c2e75116efe40cc13",
@@ -379,6 +397,12 @@
 			"path": "golang.org/x/net/html/atom",
 			"revision": "b4690f45fa1cafc47b1c280c2e75116efe40cc13",
 			"revisionTime": "2017-02-15T08:41:58Z"
+		},
+		{
+			"checksumSHA1": "uJ12+5J5K0egflT72RWxUfcBXD0=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "99f16d856c9836c42d24e7ab64ea72916925fa97",
+			"revisionTime": "2017-03-08T15:04:45Z"
 		},
 		{
 			"checksumSHA1": "0jUCEfCNVySf1NTV/8Gdmbkm//I=",

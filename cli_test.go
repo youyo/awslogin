@@ -86,7 +86,7 @@ func TestAvailableArn(t *testing.T) {
 
 func TestFetchArn(t *testing.T) {
 	cfg, _ := loadConfig("./tests/config")
-	_, err := fetchArn(cfg, "test")
+	_, _, err := fetchArn(cfg, "test")
 	var expected error
 	if err != nil {
 		t.Errorf("expected %v to eq %v", err, expected)
