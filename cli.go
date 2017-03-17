@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Songmu/prompter"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -116,14 +117,22 @@ func (cli *CLI) Run(args []string) int {
 	svc := newService(s)
 
 	// fetch arn
-	arn, err := fetchArn(cfg, rolename)
+	arn, mfaSerial, err := fetchArn(cfg, rolename)
 	if err != nil {
 		fmt.Fprintf(cli.errStream, "Could not fetch Arn.\n")
 		return ExitCodeError
 	}
 
+	// if use to MFA, please enter mfa code.
+	mfaCode := func() string {
+		if mfaSerial != "" {
+			return prompter.Prompt("Enter MFA code: ", "")
+		}
+		return ""
+	}()
+
 	// assume role
-	resp, err := svc.assumeRole(rolename, arn)
+	resp, err := svc.assumeRole(rolename, arn, mfaSerial, mfaCode)
 	if err != nil {
 		fmt.Fprintf(cli.errStream, "%s.\n", err)
 		return ExitCodeError
@@ -179,11 +188,21 @@ func newService(s *session.Session) (svc *service) {
 	return
 }
 
-func (svc *service) assumeRole(roleName, arn string) (resp *sts.AssumeRoleOutput, err error) {
-	params := &sts.AssumeRoleInput{
-		RoleArn:         aws.String(arn),
-		RoleSessionName: aws.String(roleName),
-	}
+func (svc *service) assumeRole(roleName, arn, mfaSerial, mfaCode string) (resp *sts.AssumeRoleOutput, err error) {
+	params := func() *sts.AssumeRoleInput {
+		if mfaSerial == "" {
+			return &sts.AssumeRoleInput{
+				RoleArn:         aws.String(arn),
+				RoleSessionName: aws.String(roleName),
+			}
+		}
+		return &sts.AssumeRoleInput{
+			RoleArn:         aws.String(arn),
+			RoleSessionName: aws.String(roleName),
+			SerialNumber:    aws.String(mfaSerial),
+			TokenCode:       aws.String(mfaCode),
+		}
+	}()
 	return svc.AssumeRole(params)
 }
 
@@ -232,11 +251,12 @@ func availableArn(cfg *ini.File) (list []string) {
 	return
 }
 
-func fetchArn(cfg *ini.File, roleName string) (arn string, err error) {
+func fetchArn(cfg *ini.File, roleName string) (arn, mfaSerial string, err error) {
 	s := "profile " + roleName
 	arn = cfg.Section(s).Key("role_arn").String()
+	mfaSerial = cfg.Section(s).Key("mfa_serial").String()
 	if arn == "" {
-		return "", errors.New("Could not fetch Arn")
+		return "", "", errors.New("Could not fetch Arn")
 	}
 	return
 }
