@@ -41,7 +41,7 @@ $ awslogin -r test
 
 - Recommended usage.
 
-# For Zsh
+### For Zsh
 Used with [peco](https://github.com/peco/peco).
 First install peco.
 Next install awslogin.
@@ -60,7 +60,7 @@ bindkey '+_' al-src
 
 Press '+_', you can select arn.
 
-# For Bash
+### For Bash
 Used with bash-completion.
 First install bash-completion.
 Next install awslogin.
