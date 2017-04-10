@@ -71,7 +71,7 @@ Create file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
 _awslogin()
 {
   local cur=${COMP_WORDS[COMP_CWORD]}
-  CANDIDATE=`egrep "^\["  ~/.aws/config |sed  -e "s/\[profile//" -e "s/\]//" |perl -pe 's/\n/ /g'`
+  CANDIDATE=`egrep "^\[profile" ~/.aws/config |perl -pe 's/\n/ /g;s/\[profile//;s/\]//'`
   COMPREPLY=( $(compgen -W "$CANDIDATE" -- $cur) )
 }
 
