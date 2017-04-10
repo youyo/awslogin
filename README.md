@@ -42,9 +42,9 @@ $ awslogin -r test
 
 ### For Zsh
 
-Used with [peco](https://github.com/peco/peco).
-First install peco.
-Next install awslogin.
+Used with [peco](https://github.com/peco/peco).  
+First install peco.  
+Next install awslogin.  
 Write to your `~/.zshrc` file.
 
 ```zsh
@@ -62,9 +62,9 @@ Press '+_', you can select arn.
 
 ### For Bash
 
-Used with bash-completion.
-First install bash-completion.
-Second install awslogin.
+Used with bash-completion.  
+First install bash-completion.  
+Second install awslogin.  
 Last create a config  file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
 
 ```bash
