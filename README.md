@@ -39,7 +39,6 @@ $ awslogin -r test
 
 ---
 
-- Recommended usage.
 
 ### For Zsh
 Used with [peco](https://github.com/peco/peco).
