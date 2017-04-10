@@ -39,12 +39,12 @@ $ awslogin -r test
 
 ---
 
-- Recommended usage.
 
-Used with [peco](https://github.com/peco/peco).  
-First install peco.  
-Next install awslogin.  
-Write to your `~/.zshrc` file.  
+### For Zsh
+Used with [peco](https://github.com/peco/peco).
+First install peco.
+Next install awslogin.
+Write to your `~/.zshrc` file.
 
 ```zsh
 function al-src () {
@@ -58,6 +58,26 @@ bindkey '+_' al-src
 ```
 
 Press '+_', you can select arn.
+
+### For Bash
+Used with bash-completion.
+First install bash-completion.
+Next install awslogin.
+Create file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
+
+```bash
+#!bash
+
+_awslogin()
+{
+  local cur=${COMP_WORDS[COMP_CWORD]}
+  CANDIDATE=`egrep "^\["  ~/.aws/config |sed  -e "s/\[profile//" -e "s/\]//" |perl -pe 's/\n/ /g'`
+  COMPREPLY=( $(compgen -W "$CANDIDATE" -- $cur) )
+}
+
+complete -F _awslogin awslogin
+```
+
 
 
 ## Install
