@@ -41,9 +41,10 @@ $ awslogin -r test
 
 
 ### For Zsh
-Used with [peco](https://github.com/peco/peco).
-First install peco.
-Next install awslogin.
+
+Used with [peco](https://github.com/peco/peco).  
+First install peco.  
+Next install awslogin.  
 Write to your `~/.zshrc` file.
 
 ```zsh
@@ -60,10 +61,11 @@ bindkey '+_' al-src
 Press '+_', you can select arn.
 
 ### For Bash
-Used with bash-completion.
-First install bash-completion.
-Next install awslogin.
-Create file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
+
+Used with bash-completion.  
+First install bash-completion.  
+Second install awslogin.  
+Last create a config  file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
 
 ```bash
 #!bash
@@ -71,7 +73,7 @@ Create file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
 _awslogin()
 {
   local cur=${COMP_WORDS[COMP_CWORD]}
-  CANDIDATE=`egrep "^\["  ~/.aws/config |sed  -e "s/\[profile//" -e "s/\]//" |perl -pe 's/\n/ /g'`
+  CANDIDATE=`egrep "^\[profile" ~/.aws/config |perl -pe 's/]\n/ /g;s/\[profile//'`
   COMPREPLY=( $(compgen -W "$CANDIDATE" -- $cur) )
 }
 
