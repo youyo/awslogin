@@ -10,15 +10,15 @@ Using AssumeRole, accept IAMRole and log in to the AWS management console.
 
 ```bash
 $ awslogin -h
-Usage:
-  -l    Print available ARN list and quit. (Short)
+Usage of awslogin:
+  -l	Print available ARN list and quit. (Short)
   -list
     	Print available ARN list and quit.
-  -r string
-    	Use IAM-Role. (Short)
-  -rolename string
-    	Use IAM-Role.
-  -v    Print version information and quit. (Short)
+  -p string
+    	Use Profile name. (Short)
+  -profile string
+    	Use Profile name
+  -v	Print version information and quit. (Short)
   -version
     	Print version information and quit.
 ```
@@ -26,14 +26,14 @@ Usage:
 - Print Arns.
 
 ```bash
-$ awslogin -l
+$ awslogin -list
 test
 ```
 
 - Login AWS management console.
 
 ```bash
-$ awslogin -r test
+$ awslogin -profile test
 (open browser)
 ```
 
@@ -49,8 +49,8 @@ Write to your `~/.zshrc` file.
 
 ```zsh
 function al-src () {
-    local selected_arn=$(awslogin -l | peco --query "$LBUFFER")
-    BUFFER="awslogin -r ${selected_arn}"
+    local selected_arn=$(awslogin -list | peco --query "$LBUFFER")
+    BUFFER="awslogin -profile ${selected_arn}"
     zle accept-line
     zle clear-screen
 }
@@ -80,8 +80,6 @@ _awslogin()
 complete -F _awslogin awslogin
 ```
 
-
-
 ## Install
 
 - Configure AWS CLI [default profile]. http://docs.aws.amazon.com/streams/latest/dev/kinesis-tutorial-cli-installation.html#config-cli
@@ -98,10 +96,12 @@ $ unzip awslogin_darwin_amd64.zip
 
 1. Fork ([https://github.com/youyo/awslogin/fork](https://github.com/youyo/awslogin/fork))
 1. Create a feature branch
+1. Setup Environment `make deps`
+1. Write code
+1. Run `gofmt -s`
+1. Execute test `make test`
 1. Commit your changes
 1. Rebase your local changes against the master branch
-1. Run test suite with the `go test ./...` command and confirm that it passes
-1. Run `gofmt -s`
 1. Create a new Pull Request
 
 ## Author
