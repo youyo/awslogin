@@ -1,5 +1,4 @@
 [profile test]
 role_arn = arn:aws:iam::xxxxxxxxxxxx:role/xxxxx
 source_profile = default
-output = json
-region = ap-northeast-1
+mfa_serial = arn:aws:iam::123456789012:mfa/jonsmith

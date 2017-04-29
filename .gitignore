@@ -15,3 +15,5 @@ dist/
 vendor/*
 !vendor/vendor.json
 awslogin
+*.out
+pkg/

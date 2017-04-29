@@ -27,7 +27,7 @@ lint: setup
 
 ## Run tests
 test: deps
-	govendor test +local -cover
+	govendor test -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)" +local -cover
 
 ## Build
 build: deps
