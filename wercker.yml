@@ -5,10 +5,10 @@ test:
   steps:
     - wercker/setup-go-workspace:
       package-dir: github.com/youyo/awslogin
-    - script:
-      name: Lint
-      code: |-
-        make lint
+    #- script:
+    #  name: Lint
+    #  code: |-
+    #    make lint
     - script:
       name: Tests
       code: |-
