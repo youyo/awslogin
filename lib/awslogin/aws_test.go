@@ -24,7 +24,7 @@ func TestNewService(t *testing.T) {
 
 func TestExtractRoleSessionName(t *testing.T) {
 	roleSessionName := extractRoleSessionName("arn:aws:iam::xxxxxxxxxxxx:role/xxxxx")
-	expected := "xxxxx"
+	expected := "xxxxx@awslogin"
 	if roleSessionName != expected {
 		t.Errorf("expected %v to eq %v", roleSessionName, expected)
 	}
