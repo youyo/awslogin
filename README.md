@@ -1,5 +1,7 @@
 # awslogin
 
+[![Coverage Status](https://coveralls.io/repos/github/youyo/awslogin/badge.svg?branch=master)](https://coveralls.io/github/youyo/awslogin?branch=master)
+
 ## Description
 
 Using AssumeRole, accept IAMRole and log in to the AWS management console.
