@@ -28,6 +28,7 @@ func (cli *CLI) Run(args []string) int {
 		profileName string
 		list        bool
 		version     bool
+		output      bool
 	)
 
 	// Define option flag parse
@@ -37,6 +38,7 @@ func (cli *CLI) Run(args []string) int {
 	flags.StringVar(&profileName, "p", "", "Use Profile name. (Short)")
 	flags.BoolVar(&list, "list", false, "Print available ARN list and quit.")
 	flags.BoolVar(&list, "l", false, "Print available ARN list and quit. (Short)")
+	flags.BoolVar(&output, "output", false, "Print login url and quiet. It will not login automatically.")
 	flags.BoolVar(&version, "version", false, "Print version information and quit.")
 	flags.BoolVar(&version, "v", false, "Print version information and quit. (Short)")
 
@@ -135,11 +137,16 @@ func (cli *CLI) Run(args []string) int {
 	// Build signin url
 	url = awslogin.BuildSigninURL(st)
 
-	// Open browser
-	err = awslogin.Browsing(url)
-	if err != nil {
-		fmt.Fprintf(cli.errStream, "%s.\n", err)
-		return ExitCodeError
+	// Open browser or output
+	if output {
+		fmt.Fprintf(cli.outStream, "%s\n", url)
+		return ExitCodeOK
+	} else {
+		err = awslogin.Browsing(url)
+		if err != nil {
+			fmt.Fprintf(cli.errStream, "%s.\n", err)
+			return ExitCodeError
+		}
 	}
 
 	return ExitCodeOK
