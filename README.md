@@ -16,6 +16,8 @@ Usage of awslogin:
   -l	Print available ARN list and quit. (Short)
   -list
     	Print available ARN list and quit.
+  -output
+    	Print login url and quiet. It will not login automatically.
   -p string
     	Use Profile name. (Short)
   -profile string
