@@ -29,6 +29,7 @@ func (cli *CLI) Run(args []string) int {
 		list        bool
 		version     bool
 		output      bool
+		browserApp  string
 	)
 
 	// Define option flag parse
@@ -41,6 +42,8 @@ func (cli *CLI) Run(args []string) int {
 	flags.BoolVar(&output, "output", false, "Print login url and quiet. It will not login automatically.")
 	flags.BoolVar(&version, "version", false, "Print version information and quit.")
 	flags.BoolVar(&version, "v", false, "Print version information and quit. (Short)")
+	flags.StringVar(&browserApp, "app", "", "Use browsing application.")
+	flags.StringVar(&browserApp, "a", "", "Use browsing application. (Short)")
 
 	// Parse commandline flag
 	if err := flags.Parse(args[1:]); err != nil {
@@ -142,10 +145,18 @@ func (cli *CLI) Run(args []string) int {
 		fmt.Fprintf(cli.outStream, "%s\n", url)
 		return ExitCodeOK
 	} else {
-		err = awslogin.Browsing(url)
-		if err != nil {
-			fmt.Fprintf(cli.errStream, "%s.\n", err)
-			return ExitCodeError
+		if browserApp == "" {
+			err = awslogin.Browsing(url)
+			if err != nil {
+				fmt.Fprintf(cli.errStream, "%s.\n", err)
+				return ExitCodeError
+			}
+		} else {
+			err = awslogin.BrowsingSpecificApp(url, browserApp)
+			if err != nil {
+				fmt.Fprintf(cli.errStream, "%s.\n", err)
+				return ExitCodeError
+			}
 		}
 	}
 
