@@ -19,7 +19,7 @@ jobs:
           command: |
             make test | go-junit-report > ${TEST_RESULTS}/go-test-report.xml
       - store_test_results:
-        path: ${TEST_RESULTS}
+          path: ${TEST_RESULTS}
       - run:
           name: Release
           command: |
