@@ -12,8 +12,6 @@ tmp/
 Vagrantfile
 .vagrant/
 dist/
-vendor/*
-!vendor/vendor.json
 ./awslogin
 *.out
 pkg/
