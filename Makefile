@@ -12,6 +12,7 @@ GoVersion := $(shell go version)
 setup:
 	go get -u -v github.com/golang/dep/cmd/dep
 	go get -u -v github.com/mitchellh/gox
+	go get -u -v github.com/tcnksm/ghr
 	go get -u -v github.com/jstemmer/go-junit-report
 
 ## Install dependencies
