@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: golang:1.9
     environment:
-      TEST_RESULTS: /tmp/test-results
+      TEST_RESULTS: results
     steps:
       - checkout
       - run: mkdir -p ${TEST_RESULTS}
