@@ -1,7 +1,5 @@
 # awslogin
 
-[![Coverage Status](https://coveralls.io/repos/github/youyo/awslogin/badge.svg?branch=master)](https://coveralls.io/github/youyo/awslogin?branch=master)
-
 ## Description
 
 Using AssumeRole, accept IAMRole and log in to the AWS management console.
@@ -12,77 +10,39 @@ Using AssumeRole, accept IAMRole and log in to the AWS management console.
 
 ```bash
 $ awslogin -h
-Usage of awslogin:
-  -l	Print available ARN list and quit. (Short)
-  -list
-    	Print available ARN list and quit.
-  -output
-    	Print login url and quiet. It will not login automatically.
-  -p string
-    	Use Profile name. (Short)
-  -profile string
-    	Use Profile name
-  -v	Print version information and quit. (Short)
-  -version
-    	Print version information and quit.
-```
+Using AssumeRole, accept IAMRole and login to the AWS management console.
 
-- Print Arns.
+Usage:
+  awslogin [flags]
+  awslogin [command]
 
-```bash
-$ awslogin -list
-test
+Available Commands:
+  help        Help about any command
+  list        List profiles
+  version     Show version
+
+Flags:
+  -a, --app string   Opens with the specified application.
+  -h, --help         help for awslogin
+
+Use "awslogin [command] --help" for more information about a command.
 ```
 
 - Login AWS management console.
 
 ```bash
-$ awslogin -profile test
+$ awslogin
 (open browser)
 ```
 
----
-
-
-### For Zsh
-
-Used with [peco](https://github.com/peco/peco).  
-First install peco.  
-Next install awslogin.  
-Write to your `~/.zshrc` file.
-
-```zsh
-function al-src () {
-    local selected_arn=$(awslogin -list | peco --query "$LBUFFER")
-    BUFFER="awslogin -profile ${selected_arn}"
-    zle accept-line
-    zle clear-screen
-}
-zle -N al-src
-bindkey '+_' al-src
-```
-
-Press '+_', you can select arn.
-
-### For Bash
-
-Used with bash-completion.  
-First install bash-completion.  
-Second install awslogin.  
-Last create a config  file to /usr/local/etc/bash_completion.d/awslogin (For MacOS).
+- Print Arns.
 
 ```bash
-#!bash
-
-_awslogin()
-{
-  local cur=${COMP_WORDS[COMP_CWORD]}
-  CANDIDATE=`egrep "^\[profile" ~/.aws/config |perl -pe 's/]\n/ /g;s/\[profile//'`
-  COMPREPLY=( $(compgen -W "$CANDIDATE" -- $cur) )
-}
-
-complete -F _awslogin awslogin
+$ awslogin list
+test
 ```
+
+---
 
 ## Install
 
@@ -92,15 +52,22 @@ complete -F _awslogin awslogin
 - Install awslogin command
 
 ```bash
-$ curl -sLO `curl -s 'http://grl.i-o.sh/youyo/awslogin?suffix=darwin_amd64.zip'`
-$ unzip awslogin_darwin_amd64.zip
+$ brew tap youyo/awslogin
+$ brew install awslogin
+```
+
+- Install peco command
+https://github.com/peco/peco
+
+```bash
+$ brew install peco
 ```
 
 ## Contribution
 
 1. Fork ([https://github.com/youyo/awslogin/fork](https://github.com/youyo/awslogin/fork))
 1. Create a feature branch
-1. Setup Environment `make deps`
+1. Setup Environment `make setup && make deps`
 1. Write code
 1. Run `gofmt -s`
 1. Execute test `make test`
