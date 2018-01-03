@@ -11,33 +11,26 @@ import (
 
 type (
 	Config struct {
-		Path          string
-		Data          *ini.File
-		ARN           string
-		SourceProfile string
-		MfaSerial     string
-		MfaCode       string
-		ProfileName   string
+		Path            string
+		Data            *ini.File
+		ARN             string
+		SourceProfile   string
+		MfaSerial       string
+		ProfileName     string
+		RoleSessionName string
 	}
 )
 
-func NewConfig(path ...string) (cfg *Config, err error) {
-	cp := func() string {
-		if len(path) == 0 {
-			return configPath()
-		} else {
-			return path[0]
-		}
-	}()
+func NewConfig() (cfg *Config, err error) {
 	cfg = &Config{
-		Path: cp,
+		Path: configPath(os.Getenv("HOME")),
 	}
 	cfg.Data, err = loadConfig(cfg.Path)
 	return
 }
 
-func configPath() (c string) {
-	c = filepath.Join(os.Getenv("HOME"), ".aws/config")
+func configPath(home string) (c string) {
+	c = filepath.Join(home, ".aws/config")
 	return
 }
 
@@ -61,10 +54,6 @@ func (cfg *Config) SetProfileName(profileName string) {
 	cfg.ProfileName = profileName
 }
 
-func (cfg *Config) SetMfaCode(mfaCode string) {
-	cfg.MfaCode = mfaCode
-}
-
 func (cfg *Config) FetchArn() (err error) {
 	s := "profile " + cfg.ProfileName
 	cfg.ARN = cfg.Data.Section(s).Key("role_arn").String()
@@ -74,5 +63,11 @@ func (cfg *Config) FetchArn() (err error) {
 		err = errors.New("Could not fetch Arn")
 		return
 	}
+	cfg.RoleSessionName = buildRoleSessionName(cfg.ProfileName, cfg.ARN)
+	return
+}
+
+func buildRoleSessionName(profileName, arn string) (roleSessionName string) {
+	roleSessionName = profileName + "." + strings.Split(arn, ":")[4] + "@awslogin"
 	return
 }
