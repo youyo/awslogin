@@ -30,8 +30,8 @@ const (
 
 var RootCmd = &cobra.Command{
 	Use:   "awslogin",
-	Short: "",
-	//Long: ``,
+	Short: "Login to the AWS management console.",
+	Long:  `Using AssumeRole, accept IAMRole and login to the AWS management console.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := execRoot(); err != nil {
 			log.Fatal(err)
