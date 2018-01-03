@@ -3,12 +3,10 @@ jobs:
   build:
     working_directory: /go/src/github.com/youyo/awslogin
     docker:
-      - image: golang:1.9
-    environment:
-      TEST_RESULTS: results
+      - image: circleci/golang:1.9
     steps:
       - checkout
-      - run: mkdir -p ${TEST_RESULTS}
+      - run: mkdir -p /tmp/test-results/
       - run:
           name: Dependency
           command: |
@@ -17,9 +15,9 @@ jobs:
       - run:
           name: Test
           command: |
-            make test | go-junit-report > ${TEST_RESULTS}/go-test-report.xml
+            make test | go-junit-report > /tmp/test-results/go-test-report.xml
       - store_test_results:
-          path: ${TEST_RESULTS}
+          path: /tmp/test-results/
       - run:
           name: Release
           command: |
