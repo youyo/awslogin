@@ -5,12 +5,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 const (
@@ -18,10 +17,6 @@ const (
 )
 
 type (
-	service struct {
-		*sts.STS
-	}
-
 	federatedSession struct {
 		SessionID    string `json:"sessionId"`
 		SessionKey   string `json:"sessionKey"`
@@ -39,32 +34,20 @@ func NewSession(sourceProfile string) (s *session.Session, err error) {
 	return
 }
 
-func NewService(s *session.Session) (svc *service) {
-	svc = &service{sts.New(s)}
+func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial string) (creds credentials.Value, err error) {
+	assumeRoleProvider := buildAssumeRoleProvider(roleSessionName, mfaSerial)
+	creds, err = stscreds.NewCredentials(sess, arn, assumeRoleProvider).Get()
 	return
 }
 
-func (svc *service) AssumingRole(cfg *Config) (resp *sts.AssumeRoleOutput, err error) {
-	roleSessionName := extractRoleSessionName(cfg.ARN)
-	params := func() *sts.AssumeRoleInput {
-		if cfg.MfaSerial == "" {
-			return &sts.AssumeRoleInput{
-				RoleArn:         aws.String(cfg.ARN),
-				RoleSessionName: aws.String(roleSessionName),
-			}
+func buildAssumeRoleProvider(roleSessionName, mfaSerial string) (f func(p *stscreds.AssumeRoleProvider)) {
+	f = func(p *stscreds.AssumeRoleProvider) {
+		p.RoleSessionName = roleSessionName
+		if mfaSerial != "" {
+			p.SerialNumber = aws.String(mfaSerial)
+			p.TokenProvider = stscreds.StdinTokenProvider
 		}
-		return &sts.AssumeRoleInput{
-			RoleArn:         aws.String(cfg.ARN),
-			RoleSessionName: aws.String(roleSessionName),
-			SerialNumber:    aws.String(cfg.MfaSerial),
-			TokenCode:       aws.String(cfg.MfaCode),
-		}
-	}()
-	return svc.AssumeRole(params)
-}
-
-func extractRoleSessionName(arn string) (roleSessionName string) {
-	roleSessionName = strings.Split(arn, "/")[1] + "@awslogin"
+	}
 	return
 }
 
@@ -80,23 +63,26 @@ func BuildSigninTokenRequestURL(fs string) (u string) {
 func RequestSigninToken(url string) (st string, err error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return
 	}
 	var ST signinToken
-	json.Unmarshal(body, &ST)
-	return ST.Token, nil
+	if err = json.Unmarshal(body, &ST); err != nil {
+		return
+	}
+	st = ST.Token
+	return
 }
 
-func BuildFederatedSession(resp *sts.AssumeRoleOutput) (j string, err error) {
+func BuildFederatedSession(accessKeyId, secretAccessKey, sessionToken string) (j string, err error) {
 	fs := &federatedSession{
-		SessionID:    *resp.Credentials.AccessKeyId,
-		SessionKey:   *resp.Credentials.SecretAccessKey,
-		SessionToken: *resp.Credentials.SessionToken,
+		SessionID:    accessKeyId,
+		SessionKey:   secretAccessKey,
+		SessionToken: sessionToken,
 	}
 	b, err := json.Marshal(*fs)
 	j = string(b)
