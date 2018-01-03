@@ -1,55 +1,85 @@
-Name := awslogin
-Version := $(shell git describe --tags --abbrev=0)
-OWNER := youyo
 .DEFAULT_GOAL := help
+Owner := youyo
+Name := awslogin
+Repository := "github.com/$(Owner)/$(Name)"
+GithubToken := ${GITHUB_TOKEN}
+Version := $(shell git describe --tags --abbrev=0)
+CommitHash := $(shell git rev-parse --verify HEAD)
+BuildTime := $(shell date '+%Y/%m/%d %H:%M:%S %Z')
+GoVersion := $(shell go version)
 
 ## Setup
 setup:
-	go get github.com/kardianos/govendor
-	go get github.com/Songmu/make2help/cmd/make2help
-	go get github.com/mitchellh/gox
+	go get -u -v github.com/golang/dep/cmd/dep
+	go get -u -v github.com/mitchellh/gox
+	go get -u -v github.com/jstemmer/go-junit-report
 
 ## Install dependencies
-deps: setup
-	govendor sync
+deps:
+	dep ensure -v
 
 ## Vet
-vet: setup
-	govendor vet +local
+vet:
+	go tool vet -v main.go
+	go tool vet -v cmd/
 
 ## Lint
-lint: setup
-	go get github.com/golang/lint/golint
-	govendor vet +local
-	for pkg in $$(govendor list -p -no-status +local); do \
-		golint -set_exit_status $$pkg || exit $$?; \
-	done
+lint:
+	golint -set_exit_status *.go
+	golint -set_exit_status cmd
 
 ## Run tests
-test: deps
-	govendor test -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)" +local -cover
+test:
+	go test -v -cover \
+		-ldflags "\
+			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+		" \
+		$(Repository) \
+		$(Repository)/cmd/$(Name) \
+		$(Repository)/cmd/$(Name)/cmd
+
+## Execute `go run`
+run:
+	go run \
+		-ldflags "\
+			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+		" \
+		cmd/$(Name)/main.go ${OPTION}
 
 ## Build
-build: deps
-	gox -osarch="darwin/amd64 linux/amd64" -ldflags="-X main.Version=$(Version) -X main.Name=$(Name)" -output="pkg/$(Name)_{{.OS}}_{{.Arch}}"
-
-## Build
-build-local: deps
-	go build -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)" -o __$(Name)
-
-## Install
-install: deps
-	go install -ldflags "-X main.Version=$(Version) -X main.Name=$(Name)"
+build:
+	gox -osarch="darwin/amd64" \
+		-ldflags="\
+			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+		" \
+		-output="pkg/$(Name)" \
+		$(Repository)/cmd/$(Name)
 
 ## Release
-release: build
-	for arch in "darwin_amd64" "linux_amd64"; do \
-		zip -j pkg/$(Name)_$$arch.zip pkg/$(Name)_$$arch; \
+release:
+	for arch in "darwin_amd64"; do \
+		zip -j pkg/$(Name)_$$arch.zip pkg/$(Name); \
 		done
-	ghr -t ${GITHUB_TOKEN} -u $(OWNER) -r $(Name) --replace $(Version) pkg/
+	ghr -t ${GithubToken} -u $(Owner) -r $(Name) --replace $(Version) pkg/
+
+## Remove packages
+clean:
+	rm -rf pkg/
 
 ## Show help
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps vet lint test build build-local install release help
+.PHONY: setup deps vet lint test build release clean help
