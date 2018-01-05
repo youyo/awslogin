@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -42,6 +43,7 @@ func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial strin
 
 func buildAssumeRoleProvider(roleSessionName, mfaSerial string) (f func(p *stscreds.AssumeRoleProvider)) {
 	f = func(p *stscreds.AssumeRoleProvider) {
+		p.Duration = time.Duration(60) * time.Minute
 		p.RoleSessionName = roleSessionName
 		if mfaSerial != "" {
 			p.SerialNumber = aws.String(mfaSerial)
