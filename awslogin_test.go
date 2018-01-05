@@ -1,7 +1,10 @@
 package awslogin
 
 import (
+	"reflect"
 	"testing"
+
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 )
 
 func TestNewSession(t *testing.T) {
@@ -13,11 +16,18 @@ func TestNewSession(t *testing.T) {
 }
 
 func TestNewCredentials(t *testing.T) {
-	// write test
+
 }
 
 func TestBuildAssumeRoleProvider(t *testing.T) {
-	// write test
+	p := buildAssumeRoleProvider(
+		"test.xxxxxxxxxxxx@awslogin",
+		"arn:aws:iam::123456789012:mfa/jonsmith",
+	)
+	var expected func(p *stscreds.AssumeRoleProvider)
+	if reflect.TypeOf(p) != reflect.TypeOf(expected) {
+		t.Errorf("expected %v to eq %v", reflect.TypeOf(p), reflect.TypeOf(expected))
+	}
 }
 
 func TestBuildSigninTokenRequestURL(t *testing.T) {
