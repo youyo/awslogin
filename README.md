@@ -22,8 +22,9 @@ Available Commands:
   version     Show version
 
 Flags:
-  -a, --app string   Opens with the specified application.
-  -h, --help         help for awslogin
+  -a, --app string       Opens with the specified application.
+  -h, --help             help for awslogin
+  -p, --profile string   Use a specific profile.
 
 Use "awslogin [command] --help" for more information about a command.
 ```
@@ -32,6 +33,13 @@ Use "awslogin [command] --help" for more information about a command.
 
 ```bash
 $ awslogin
+(open browser)
+```
+
+- Login AWS management console using a specific profile.
+
+```bash
+$ awslogin -p profile-1
 (open browser)
 ```
 
