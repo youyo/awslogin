@@ -1,5 +1,7 @@
 # awslogin
 
+[![CircleCI](https://circleci.com/gh/youyo/awslogin.svg?style=svg)](https://circleci.com/gh/youyo/awslogin)
+
 ## Description
 
 Using AssumeRole, accept IAMRole and log in to the AWS management console.
