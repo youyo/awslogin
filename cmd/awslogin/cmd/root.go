@@ -21,6 +21,7 @@ var (
 	BuildTime  string
 	GoVersion  string
 	app        string
+	profile    string
 )
 
 const (
@@ -40,25 +41,8 @@ var RootCmd = &cobra.Command{
 }
 
 func execRoot() (err error) {
-	cmd := exec.Command(Peco)
-	stdin, err := cmd.StdinPipe()
+	p, err := loadProfile(profile)
 	if err != nil {
-		return
-	}
-
-	buf := &bytes.Buffer{}
-	if err = execList(buf); err != nil {
-		return
-	}
-
-	list := buf.String()
-	io.WriteString(stdin, list)
-	stdin.Close()
-
-	profile, err := cmd.Output()
-	if err != nil {
-		errorMessage := fmt.Sprintf("'%s' is Required command. Please install it. %s ", Peco, PecoGithubUrl)
-		err = errors.Wrap(err, errorMessage)
 		return
 	}
 
@@ -67,7 +51,7 @@ func execRoot() (err error) {
 		return
 	}
 
-	cfg.SetProfileName(strings.TrimRight(string(profile), "\n"))
+	cfg.SetProfileName(p)
 
 	if err = cfg.FetchArn(); err != nil {
 		return
@@ -109,6 +93,36 @@ func execRoot() (err error) {
 	return
 }
 
+func loadProfile(p string) (profile string, err error) {
+	if p != "" {
+		profile = p
+		return
+	}
+	cmd := exec.Command(Peco)
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return
+	}
+
+	buf := &bytes.Buffer{}
+	if err = execList(buf); err != nil {
+		return
+	}
+
+	list := buf.String()
+	io.WriteString(stdin, list)
+	stdin.Close()
+
+	byteProfile, err := cmd.Output()
+	if err != nil {
+		errorMessage := fmt.Sprintf("'%s' is Required command. Please install it. %s ", Peco, PecoGithubUrl)
+		err = errors.Wrap(err, errorMessage)
+		return
+	}
+	profile = strings.TrimRight(string(byteProfile), "\n")
+	return
+}
+
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -119,6 +133,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.Flags().StringVarP(&app, "app", "a", "", "Opens with the specified application.")
+	RootCmd.Flags().StringVarP(&profile, "profile", "p", "", "Use a specific profile.")
 }
 
 func initConfig() {}
