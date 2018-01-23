@@ -15,13 +15,14 @@ import (
 )
 
 var (
-	Name       string
-	Version    string
-	CommitHash string
-	BuildTime  string
-	GoVersion  string
-	app        string
-	profile    string
+	Name        string
+	Version     string
+	CommitHash  string
+	BuildTime   string
+	GoVersion   string
+	app         string
+	profile     string
+	readFromEnv bool
 )
 
 const (
@@ -98,6 +99,13 @@ func loadProfile(p string) (profile string, err error) {
 		profile = p
 		return
 	}
+
+	// Read from env-variable
+	if readFromEnv {
+		profile = os.Getenv("AWS_PROFILE")
+		return
+	}
+
 	cmd := exec.Command(Peco)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -134,6 +142,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.Flags().StringVarP(&app, "app", "a", "", "Opens with the specified application.")
 	RootCmd.Flags().StringVarP(&profile, "profile", "p", "", "Use a specific profile.")
+	RootCmd.Flags().BoolVarP(&readFromEnv, "read-from-env", "e", false, "Use a specific profile read from the environment. [$AWS_PROFILE]")
 }
 
 func initConfig() {}
