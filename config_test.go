@@ -83,7 +83,7 @@ func TestFetchArn(t *testing.T) {
 		t.Errorf("expected %v to eq %v", err, expected)
 	}
 
-	var expectedARN string = "arn:aws:iam::xxxxxxxxxxxx:role/xxxxx"
+	var expectedARN string = "arn:aws:iam::xxxxxxxxxxxx:role/test"
 	if cfg.ARN != expectedARN {
 		t.Errorf("expected %v to eq %v", err, expectedARN)
 	}
@@ -112,7 +112,7 @@ func TestFetchArn(t *testing.T) {
 }
 
 func TestBuildRoleSessionName(t *testing.T) {
-	roleSessionName := buildRoleSessionName("test", "arn:aws:iam::xxxxxxxxxxxx:role/xxxxx")
+	roleSessionName := buildRoleSessionName("arn:aws:iam::xxxxxxxxxxxx:role/test")
 	var expected string = "test.xxxxxxxxxxxx@awslogin"
 	if roleSessionName != expected {
 		t.Errorf("expected %v to eq %v", roleSessionName, expected)

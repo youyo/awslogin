@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	ini "gopkg.in/ini.v1"
 )
@@ -63,11 +64,16 @@ func (cfg *Config) FetchArn() (err error) {
 		err = errors.New("Could not fetch Arn")
 		return
 	}
-	cfg.RoleSessionName = buildRoleSessionName(cfg.ProfileName, cfg.ARN)
+	cfg.RoleSessionName = buildRoleSessionName(cfg.ARN)
 	return
 }
 
-func buildRoleSessionName(profileName, arn string) (roleSessionName string) {
-	roleSessionName = profileName + "." + strings.Split(arn, ":")[4] + "@awslogin"
+func buildRoleSessionName(arn string) (roleSessionName string) {
+	roleName := strings.Split(arn, "/")[1]
+	awsAccountID := strings.Split(arn, ":")[4]
+	roleSessionName = roleName + "." + awsAccountID + "@awslogin"
+	if utf8.RuneCountInString(roleSessionName) > 64 {
+		roleSessionName = awsAccountID + "@awslogin"
+	}
 	return
 }
