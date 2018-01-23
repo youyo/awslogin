@@ -27,6 +27,7 @@ Flags:
   -a, --app string       Opens with the specified application.
   -h, --help             help for awslogin
   -p, --profile string   Use a specific profile.
+  -e, --read-from-env    Use a specific profile read from the environment. [$AWS_PROFILE]
 
 Use "awslogin [command] --help" for more information about a command.
 ```
@@ -45,11 +46,21 @@ $ awslogin -p profile-1
 (open browser)
 ```
 
+- Login AWS management console using a specific profile read from the environment.
+
+```bash
+$ export AWS_PROFILE=profile-1
+$ awslogin -e
+(open browser)
+```
+
 - Print Arns.
 
 ```bash
 $ awslogin list
 test
+profile-1
+profile-2
 ```
 
 ---
@@ -64,13 +75,6 @@ test
 ```bash
 $ brew tap youyo/awslogin
 $ brew install awslogin
-```
-
-- Install peco command
-https://github.com/peco/peco
-
-```bash
-$ brew install peco
 ```
 
 ## Contribution
