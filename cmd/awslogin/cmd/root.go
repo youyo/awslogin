@@ -103,6 +103,7 @@ func loadProfile(p string) (profile string, err error) {
 	// Read from env-variable
 	if readFromEnv {
 		profile = os.Getenv("AWS_PROFILE")
+		fmt.Fprintf(os.Stdout, "The selected profile is %s\n", profile)
 		return
 	}
 
@@ -128,6 +129,7 @@ func loadProfile(p string) (profile string, err error) {
 		return
 	}
 	profile = strings.TrimRight(string(byteProfile), "\n")
+	fmt.Fprintf(os.Stdout, "The selected profile is %s\n", profile)
 	return
 }
 
