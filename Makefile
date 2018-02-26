@@ -14,6 +14,7 @@ setup:
 	go get -u -v github.com/mitchellh/gox
 	go get -u -v github.com/tcnksm/ghr
 	go get -u -v github.com/jstemmer/go-junit-report
+	go get -u -v github.com/git-chglog/git-chglog/cmd/git-chglog
 
 ## Install dependencies
 deps:
@@ -75,6 +76,10 @@ release:
 		done
 	ghr -t ${GithubToken} -u $(Owner) -r $(Name) --replace $(Version) pkg/
 
+## Generate Changelog
+changelog:
+	git-chglog > CHANGELOG.md
+
 ## Remove packages
 clean:
 	rm -rf pkg/
@@ -83,4 +88,4 @@ clean:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps vet lint test build release clean help
+.PHONY: setup deps vet lint test build release changelog clean help
