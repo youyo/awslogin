@@ -24,10 +24,11 @@ Available Commands:
   version     Show version
 
 Flags:
-  -a, --app string       Opens with the specified application.
-  -h, --help             help for awslogin
-  -p, --profile string   Use a specific profile.
-  -e, --read-from-env    Use a specific profile read from the environment. [$AWS_PROFILE]
+  -a, --app string             Opens with the specified application.
+  -d, --duration-seconds int   Request a session duration seconds. 900 - 43200 (default 3600)
+  -h, --help                   help for awslogin
+  -p, --profile string         Use a specific profile.
+  -e, --read-from-env          Use a specific profile read from the environment. [$AWS_PROFILE]
 
 Use "awslogin [command] --help" for more information about a command.
 ```

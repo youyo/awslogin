@@ -23,6 +23,7 @@ func TestBuildAssumeRoleProvider(t *testing.T) {
 	p := buildAssumeRoleProvider(
 		"test.xxxxxxxxxxxx@awslogin",
 		"arn:aws:iam::123456789012:mfa/jonsmith",
+		3600,
 	)
 	var expected func(p *stscreds.AssumeRoleProvider)
 	if reflect.TypeOf(p) != reflect.TypeOf(expected) {

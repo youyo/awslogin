@@ -15,14 +15,15 @@ import (
 )
 
 var (
-	Name        string
-	Version     string
-	CommitHash  string
-	BuildTime   string
-	GoVersion   string
-	app         string
-	profile     string
-	readFromEnv bool
+	Name            string
+	Version         string
+	CommitHash      string
+	BuildTime       string
+	GoVersion       string
+	app             string
+	profile         string
+	readFromEnv     bool
+	durationSeconds int
 )
 
 const (
@@ -63,7 +64,7 @@ func execRoot() (err error) {
 		return
 	}
 
-	creds, err := awslogin.NewCredentials(sess, cfg.ARN, cfg.RoleSessionName, cfg.MfaSerial)
+	creds, err := awslogin.NewCredentials(sess, cfg.ARN, cfg.RoleSessionName, cfg.MfaSerial, durationSeconds)
 	if err != nil {
 		return
 	}
@@ -145,6 +146,7 @@ func init() {
 	RootCmd.Flags().StringVarP(&app, "app", "a", "", "Opens with the specified application.")
 	RootCmd.Flags().StringVarP(&profile, "profile", "p", "", "Use a specific profile.")
 	RootCmd.Flags().BoolVarP(&readFromEnv, "read-from-env", "e", false, "Use a specific profile read from the environment. [$AWS_PROFILE]")
+	RootCmd.Flags().IntVarP(&durationSeconds, "duration-seconds", "d", 3600, "Request a session duration seconds. 900 - 43200")
 }
 
 func initConfig() {}
