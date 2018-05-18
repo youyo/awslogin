@@ -43,7 +43,7 @@ func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial strin
 
 func buildAssumeRoleProvider(roleSessionName, mfaSerial string) (f func(p *stscreds.AssumeRoleProvider)) {
 	f = func(p *stscreds.AssumeRoleProvider) {
-		p.Duration = time.Duration(60) * time.Minute
+		p.Duration = time.Duration(60*60*12) * time.Second
 		p.RoleSessionName = roleSessionName
 		if mfaSerial != "" {
 			p.SerialNumber = aws.String(mfaSerial)
