@@ -35,15 +35,15 @@ func NewSession(sourceProfile string) (s *session.Session, err error) {
 	return
 }
 
-func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial string) (creds credentials.Value, err error) {
-	assumeRoleProvider := buildAssumeRoleProvider(roleSessionName, mfaSerial)
+func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial string, durationSeconds int) (creds credentials.Value, err error) {
+	assumeRoleProvider := buildAssumeRoleProvider(roleSessionName, mfaSerial, durationSeconds)
 	creds, err = stscreds.NewCredentials(sess, arn, assumeRoleProvider).Get()
 	return
 }
 
-func buildAssumeRoleProvider(roleSessionName, mfaSerial string) (f func(p *stscreds.AssumeRoleProvider)) {
+func buildAssumeRoleProvider(roleSessionName, mfaSerial string, durationSeconds int) (f func(p *stscreds.AssumeRoleProvider)) {
 	f = func(p *stscreds.AssumeRoleProvider) {
-		p.Duration = time.Duration(60*60*12) * time.Second
+		p.Duration = time.Duration(durationSeconds) * time.Second
 		p.RoleSessionName = roleSessionName
 		if mfaSerial != "" {
 			p.SerialNumber = aws.String(mfaSerial)
