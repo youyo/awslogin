@@ -72,6 +72,17 @@ func TestSetProfileName(t *testing.T) {
 	}
 }
 
+func TestSetDurationSeconds(t *testing.T) {
+	pwd, _ := os.Getwd()
+	os.Setenv("HOME", pwd+"/tests")
+	cfg, _ := NewConfig()
+	cfg.SetDurationSeconds(4000)
+	expected := 4000
+	if cfg.DurationSeconds != expected {
+		t.Errorf("expected %v to eq %v", cfg.DurationSeconds, expected)
+	}
+}
+
 func TestFetchArn(t *testing.T) {
 	pwd, _ := os.Getwd()
 	os.Setenv("HOME", pwd+"/tests")
@@ -96,6 +107,11 @@ func TestFetchArn(t *testing.T) {
 	var expectedMfaSerial string = "arn:aws:iam::123456789012:mfa/jonsmith"
 	if cfg.MfaSerial != expectedMfaSerial {
 		t.Errorf("expected %v to eq %v", err, expectedMfaSerial)
+	}
+
+	var expectedDurationSeconds int = 43200
+	if cfg.DurationSeconds != expectedDurationSeconds {
+		t.Errorf("expected %v to eq %v", err, expectedDurationSeconds)
 	}
 
 	var expectedRoleSessionName string = "test.xxxxxxxxxxxx@awslogin"

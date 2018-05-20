@@ -19,12 +19,14 @@ type (
 		MfaSerial       string
 		ProfileName     string
 		RoleSessionName string
+		DurationSeconds int
 	}
 )
 
 func NewConfig() (cfg *Config, err error) {
 	cfg = &Config{
-		Path: configPath(os.Getenv("HOME")),
+		Path:            configPath(os.Getenv("HOME")),
+		DurationSeconds: 3600,
 	}
 	cfg.Data, err = loadConfig(cfg.Path)
 	return
@@ -55,10 +57,17 @@ func (cfg *Config) SetProfileName(profileName string) {
 	cfg.ProfileName = profileName
 }
 
+func (cfg *Config) SetDurationSeconds(durationSeconds int) {
+	cfg.DurationSeconds = durationSeconds
+}
+
 func (cfg *Config) FetchArn() (err error) {
 	s := "profile " + cfg.ProfileName
 	cfg.ARN = cfg.Data.Section(s).Key("role_arn").String()
 	cfg.SourceProfile = cfg.Data.Section(s).Key("source_profile").String()
+	if cfg.Data.Section(s).HasKey("duration_seconds") {
+		cfg.DurationSeconds = cfg.Data.Section(s).Key("duration_seconds").MustInt()
+	}
 	cfg.MfaSerial = cfg.Data.Section(s).Key("mfa_serial").String()
 	if cfg.ARN == "" {
 		err = errors.New("Could not fetch Arn")

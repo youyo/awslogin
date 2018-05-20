@@ -59,12 +59,16 @@ func execRoot() (err error) {
 		return
 	}
 
+	if durationSeconds != 3600 {
+		cfg.SetDurationSeconds(durationSeconds)
+	}
+
 	sess, err := awslogin.NewSession(cfg.SourceProfile)
 	if err != nil {
 		return
 	}
 
-	creds, err := awslogin.NewCredentials(sess, cfg.ARN, cfg.RoleSessionName, cfg.MfaSerial, durationSeconds)
+	creds, err := awslogin.NewCredentials(sess, cfg.ARN, cfg.RoleSessionName, cfg.MfaSerial, cfg.DurationSeconds)
 	if err != nil {
 		return
 	}
