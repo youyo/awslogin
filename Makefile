@@ -14,7 +14,8 @@ setup:
 	go get -u -v github.com/mitchellh/gox
 	go get -u -v github.com/tcnksm/ghr
 	go get -u -v github.com/jstemmer/go-junit-report
-	go get -u -v github.com/git-chglog/git-chglog/cmd/git-chglog
+	go get -u -v github.com/Songmu/ghch/cmd/ghch
+	go get -u -v github.com/motemen/gobump/cmd/gobump
 
 ## Install dependencies
 deps:
@@ -22,52 +23,44 @@ deps:
 
 ## Vet
 vet:
-	go tool vet -v main.go
-	go tool vet -v cmd/
+	go vet -v $(shell go list ./...)
 
 ## Lint
 lint:
-	golint -set_exit_status *.go
-	golint -set_exit_status cmd
+	golint -set_exit_status $(shell go list ./...) && echo 'No problem.'
 
 ## Run tests
 test:
 	go test -v -cover \
 		-ldflags "\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
-		" \
-		$(Repository) \
-		$(Repository)/cmd/$(Name) \
-		$(Repository)/cmd/$(Name)/cmd
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+		" $(shell go list ./...)
 
 ## Execute `go run`
 run:
 	go run \
 		-ldflags "\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
 		" \
-		cmd/$(Name)/main.go ${OPTION}
+		$(Name)/main.go ${OPTION}
 
 ## Build
 build:
 	gox -osarch="darwin/amd64" \
 		-ldflags="\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
 		" \
 		-output="pkg/$(Name)" \
-		$(Repository)/cmd/$(Name)
+		$(Repository)/$(Name)
 
 ## Release
 release:
@@ -76,9 +69,16 @@ release:
 		done
 	ghr -t ${GithubToken} -u $(Owner) -r $(Name) --replace $(Version) pkg/
 
-## Generate Changelog
-changelog:
-	git-chglog > CHANGELOG.md
+## Bump up
+bump-up:
+	cp CHANGELOG.md{,_old}
+	$(eval ver := $(shell gobump patch -v -w | jq -r '.Version'))
+	ghch --format=markdown --next-version=$(ver) > CHANGELOG.md
+	cat CHANGELOG.md_old >> CHANGELOG.md
+	rm -f CHANGELOG.md_old
+	git add .
+	git commit -m "bump up"
+	git tag $(ver)
 
 ## Remove packages
 clean:
@@ -88,4 +88,5 @@ clean:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps vet lint test build release changelog clean help
+.PHONY: help
+.SILENT:

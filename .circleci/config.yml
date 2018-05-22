@@ -1,12 +1,27 @@
+workflows:
+  version: 2
+  main:
+    jobs:
+      - test
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+
+defaults: &defaults
+  working_directory: /go/src/github.com/youyo/awslogin
+  docker:
+    - image: circleci/golang:1
+
 version: 2
 jobs:
-  build:
-    working_directory: /go/src/github.com/youyo/awslogin
-    docker:
-      - image: circleci/golang:1.9
+  test:
+    <<: *defaults
     steps:
       - checkout
-      - run: mkdir -p /tmp/test-results/
+      - run: mkdir -p /tmp/test-results
       - run:
           name: Dependency
           command: |
@@ -15,15 +30,18 @@ jobs:
       - run:
           name: Test
           command: |
-            make test | go-junit-report > /tmp/test-results/go-test-report.xml
+            trap "go-junit-report </tmp/test-results/go-test.out > /tmp/test-results/go-test-report.xml" EXIT
+            make test | tee /tmp/test-results/go-test.out
+      - run:
+          name: Build
+          command: |
+            make build
       - store_test_results:
-          path: /tmp/test-results/
+          path: /tmp/test-results
+  release:
+    <<: *defaults
+    steps:
       - run:
           name: Release
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              make build
-              make release
-            else
-              echo "Not master branch."
-            fi
+            make release

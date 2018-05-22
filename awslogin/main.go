@@ -20,7 +20,7 @@
 
 package main
 
-import "github.com/youyo/awslogin/cmd/awslogin/cmd"
+import "github.com/youyo/awslogin/awslogin/cmd"
 
 func main() {
 	cmd.Execute()
