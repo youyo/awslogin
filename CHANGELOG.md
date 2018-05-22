@@ -1,3 +1,7 @@
+## [1.1.9](https://github.com/youyo/awslogin/compare/1.1.8...1.1.9) (2018-05-22)
+
+* because could not release [#29](https://github.com/youyo/awslogin/pull/29) ([youyo](https://github.com/youyo))
+* bump up [#28](https://github.com/youyo/awslogin/pull/28) ([youyo](https://github.com/youyo))
 ## [1.1.8](https://github.com/youyo/awslogin/compare/1.1.7...1.1.8) (2018-05-22)
 
 * output ci test result [#27](https://github.com/youyo/awslogin/pull/27) ([youyo](https://github.com/youyo))
