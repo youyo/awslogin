@@ -1,3 +1,10 @@
+## [1.1.8](https://github.com/youyo/awslogin/compare/1.1.7...1.1.8) (2018-05-22)
+
+* output ci test result [#27](https://github.com/youyo/awslogin/pull/27) ([youyo](https://github.com/youyo))
+* build bump-up command [#26](https://github.com/youyo/awslogin/pull/26) ([youyo](https://github.com/youyo))
+* use workflows [#25](https://github.com/youyo/awslogin/pull/25) ([youyo](https://github.com/youyo))
+* simplify directory-tree [#24](https://github.com/youyo/awslogin/pull/24) ([youyo](https://github.com/youyo))
+* duration-seconds parameter is settable by config file [#23](https://github.com/youyo/awslogin/pull/23) ([youyo](https://github.com/youyo))
 
 <a name="1.1.7"></a>
 ## [1.1.7](https://github.com/youyo/awslogin/compare/1.1.6...1.1.7) (2018-05-21)
