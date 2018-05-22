@@ -43,6 +43,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Dependency
+          command: |
+            make setup
+            make deps
+      - run:
           name: Build
           command: |
             make build
