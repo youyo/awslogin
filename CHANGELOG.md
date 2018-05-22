@@ -1,4 +1,20 @@
 
+<a name="1.1.7"></a>
+## [1.1.7](https://github.com/youyo/awslogin/compare/1.1.6...1.1.7) (2018-05-21)
+
+### Pull Requests
+
+* Merge pull request [#22](https://github.com/youyo/awslogin/issues/22) from youyo/feature/longer-role-sessions
+
+
+<a name="1.1.6"></a>
+## [1.1.6](https://github.com/youyo/awslogin/compare/1.1.5...1.1.6) (2018-05-18)
+
+### Pull Requests
+
+* Merge pull request [#21](https://github.com/youyo/awslogin/issues/21) from youyo/output-selected-profile
+
+
 <a name="1.1.5"></a>
 ## [1.1.5](https://github.com/youyo/awslogin/compare/1.1.4...1.1.5) (2018-02-06)
 
