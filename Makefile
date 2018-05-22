@@ -80,6 +80,14 @@ bump-up:
 	git commit -m "bump up"
 	git tag $(ver)
 
+## update homebrew
+update-homebrew:
+	curl -s -X POST \
+		-u ${CIRCLE_API_TOKEN}: \
+		-d build_parameters[AWSLOGIN_VERSION]=$(Version) \
+		-d build_parameters[CIRCLE_JOB]=release \
+		https://circleci.com/api/v1.1/project/github/youyo/homebrew-awslogin/tree/master
+
 ## Remove packages
 clean:
 	rm -rf pkg/

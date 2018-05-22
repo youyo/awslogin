@@ -55,3 +55,7 @@ jobs:
           name: Release
           command: |
             make release
+      - run:
+          name: Update Homebrew
+          command: |
+            make update-homebrew
