@@ -30,7 +30,8 @@ jobs:
       - run:
           name: Test
           command: |
-            make test | go-junit-report > /tmp/test-results/go-test-report.xml
+            trap "go-junit-report </tmp/test-results/go-test.out > /tmp/test-results/go-test-report.xml" EXIT
+            make test | tee /tmp/test-results/go-test.out
       - run:
           name: Build
           command: |

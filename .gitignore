@@ -14,5 +14,6 @@ Vagrantfile
 dist/
 ./awslogin
 *.out
+*.xml
 pkg/
 vendor/
