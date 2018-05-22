@@ -22,52 +22,47 @@ deps:
 
 ## Vet
 vet:
-	go tool vet -v main.go
-	go tool vet -v cmd/
+	go vet -v $(shell go list ./...)
 
 ## Lint
 lint:
-	golint -set_exit_status *.go
-	golint -set_exit_status cmd
+	golint -set_exit_status $(shell go list ./...) && echo 'No problem.'
 
 ## Run tests
 test:
 	go test -v -cover \
 		-ldflags "\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
-		" \
-		$(Repository) \
-		$(Repository)/cmd/$(Name) \
-		$(Repository)/cmd/$(Name)/cmd
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+		" $(shell go list ./...)
 
 ## Execute `go run`
 run:
 	go run \
 		-ldflags "\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
 		" \
-		cmd/$(Name)/main.go ${OPTION}
+		$(Name)/main.go ${OPTION}
 
 ## Build
 build:
 	gox -osarch="darwin/amd64" \
 		-ldflags="\
-			-X \"$(Repository)/cmd/$(Name)/cmd.Name=$(Name)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.Version=$(Version)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.CommitHash=$(CommitHash)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.BuildTime=$(BuildTime)\" \
-			-X \"$(Repository)/cmd/$(Name)/cmd.GoVersion=$(GoVersion)\"\
+			-X \"$(Repository)/$(Name)/cmd.Name=$(Name)\" \
+			-X \"$(Repository)/$(Name)/cmd.Version=$(Version)\" \
+			-X \"$(Repository)/$(Name)/cmd.CommitHash=$(CommitHash)\" \
+			-X \"$(Repository)/$(Name)/cmd.BuildTime=$(BuildTime)\" \
+			-X \"$(Repository)/$(Name)/cmd.GoVersion=$(GoVersion)\"\
 		" \
 		-output="pkg/$(Name)" \
-		$(Repository)/cmd/$(Name)
+		$(Repository)/$(Name)
 
 ## Release
 release:
@@ -88,4 +83,5 @@ clean:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps vet lint test build release changelog clean help
+.PHONY: help
+.SILENT:
