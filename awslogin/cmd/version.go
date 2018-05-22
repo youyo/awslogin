@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	latest "github.com/tcnksm/go-latest"
+	"github.com/youyo/awslogin"
 )
 
 var versionCmd = &cobra.Command{
@@ -15,7 +16,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	//Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := execVersion(os.Stdout, Version, CommitHash, BuildTime, GoVersion); err != nil {
+		if err := execVersion(os.Stdout, awslogin.Version, CommitHash, BuildTime, GoVersion); err != nil {
 			log.Fatal(err)
 		}
 	},
