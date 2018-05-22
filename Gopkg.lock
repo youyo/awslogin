@@ -20,6 +20,8 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/sdkio",
+    "internal/sdkrand",
     "internal/shareddefaults",
     "private/protocol",
     "private/protocol/query",
@@ -28,20 +30,20 @@
     "private/protocol/xml/xmlutil",
     "service/sts"
   ]
-  revision = "f62f7b7c5425f2b1a630932617477bdeac6dc371"
-  version = "v1.12.55"
+  revision = "cf00d544fc3c02f31e05e8d02444a1325d3a840b"
+  version = "v1.13.53"
 
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
-  version = "v1.32.0"
+  revision = "6529cf7c58879c08d927016dde4477f18a0634cb"
+  version = "v1.36.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "fc3c57184028a80ff3979d912cdaf5f08887f98a"
+  revision = "e48060a28fac52d0f1cb758bc8b87c07bac4a87d"
+  version = "v15.0.0"
 
 [[projects]]
   branch = "master"
@@ -53,7 +55,7 @@
   branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  revision = "4fe82ae3040f80a03d04d2cccb5606a626b8e1ee"
+  revision = "23480c0665776210b5fbbac6eaaee40e3e6a96b7"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -81,14 +83,14 @@
 [[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
-  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
-  version = "v0.0.1"
+  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
+  version = "v0.0.3"
 
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
+  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -103,17 +105,17 @@
     "html",
     "html/atom"
   ]
-  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+  revision = "8e0cdda24ed423affc8f35c241e5e9b16180338e"
 
 [[projects]]
   name = "gopkg.in/ini.v1"
   packages = ["."]
-  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
-  version = "v1.32.0"
+  revision = "6529cf7c58879c08d927016dde4477f18a0634cb"
+  version = "v1.36.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "44ce2920bed686ae13339fb3b648504d58b549f8911814025e0c4a19aae72146"
+  inputs-digest = "dd865fb012de38cf9911520d92032026d16cabc2e91c2e55faf85f723d9749f5"
   solver-name = "gps-cdcl"
   solver-version = 1
