@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -11,28 +8,24 @@ import (
 	"github.com/youyo/awslogin"
 )
 
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List profiles",
-	//Long: ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := execList(os.Stdout); err != nil {
-			log.Fatal(err)
-		}
-	},
-}
+func init() {}
 
-func execList(w io.Writer) (err error) {
-	cfg, err := awslogin.NewConfig()
-	if err != nil {
-		return
+func NewCmdList() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List profiles",
+		Run: func(cmd *cobra.Command, args []string) {
+			c := awslogin.NewConfig()
+			if err := c.SetData(); err != nil {
+				cmd.SetOutput(os.Stderr)
+				cmd.Println(err)
+				os.Exit(1)
+			}
+			aa := c.AvailableArn()
+			list := strings.Join(aa[:], "\n")
+			cmd.Println(list)
+		},
 	}
-	aa := cfg.AvailableArn()
-	list := strings.Join(aa[:], "\n")
-	fmt.Fprintln(w, list)
-	return
-}
-
-func init() {
-	RootCmd.AddCommand(listCmd)
+	cobra.OnInitialize(initConfig)
+	return cmd
 }

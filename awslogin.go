@@ -17,28 +17,109 @@ const (
 	SigninBaseURL string = "https://signin.aws.amazon.com/federation"
 )
 
-type (
-	federatedSession struct {
-		SessionID    string `json:"sessionId"`
-		SessionKey   string `json:"sessionKey"`
-		SessionToken string `json:"sessionToken"`
-	}
-
-	signinToken struct {
-		Token string `json:"SigninToken"`
-	}
-)
-
-func NewSession(sourceProfile string) (s *session.Session, err error) {
-	cred := credentials.NewSharedCredentials("", sourceProfile)
-	s, err = session.NewSession(&aws.Config{Credentials: cred})
-	return
+type Signin struct {
+	Token string `json:"SigninToken"`
 }
 
-func NewCredentials(sess *session.Session, arn, roleSessionName, mfaSerial string, durationSeconds int) (creds credentials.Value, err error) {
-	assumeRoleProvider := buildAssumeRoleProvider(roleSessionName, mfaSerial, durationSeconds)
-	creds, err = stscreds.NewCredentials(sess, arn, assumeRoleProvider).Get()
-	return
+type Awslogin struct {
+	SourceProfile         string                             `json:"-"`
+	ARN                   string                             `json:"-"`
+	RoleSessionName       string                             `json:"-"`
+	MfaSerial             string                             `json:"-"`
+	DurationSeconds       int                                `json:"-"`
+	AssumeRoleProvider    func(*stscreds.AssumeRoleProvider) `json:"-"`
+	FederatedSessionID    string                             `json:"sessionId"`
+	FederatedSessionKey   string                             `json:"sessionKey"`
+	FederatedSessionToken string                             `json:"sessionToken"`
+	FederatedSession      string                             `json:"-"`
+	SigninTokenRequestURL string                             `json:"-"`
+	SigninToken           string                             `json:"-"`
+	SigninUrl             string                             `json:"-"`
+}
+
+func NewAwslogin(c *Config) *Awslogin {
+	return &Awslogin{
+		SourceProfile:   c.SourceProfile,
+		ARN:             c.ARN,
+		RoleSessionName: c.RoleSessionName,
+		MfaSerial:       c.MfaSerial,
+		DurationSeconds: c.DurationSeconds,
+	}
+}
+
+func (al *Awslogin) BuildAssumeRoleProvider() {
+	al.AssumeRoleProvider = func(p *stscreds.AssumeRoleProvider) {
+		p.Duration = time.Duration(al.DurationSeconds) * time.Second
+		p.RoleSessionName = al.RoleSessionName
+		if al.MfaSerial != "" {
+			p.SerialNumber = aws.String(al.MfaSerial)
+			p.TokenProvider = stscreds.StdinTokenProvider
+		}
+	}
+}
+
+func (al *Awslogin) GetCredentials() error {
+	cred := credentials.NewSharedCredentials("", al.SourceProfile)
+	s, err := session.NewSession(&aws.Config{Credentials: cred})
+	if err != nil {
+		return err
+	}
+	creds, err := stscreds.NewCredentials(s, al.ARN, al.AssumeRoleProvider).Get()
+	if err != nil {
+		return err
+	}
+	al.FederatedSessionID = creds.AccessKeyID
+	al.FederatedSessionKey = creds.SecretAccessKey
+	al.FederatedSessionToken = creds.SessionToken
+	return nil
+}
+
+func (al *Awslogin) GetFederatedSession() error {
+	bytes, err := json.Marshal(al)
+	if err != nil {
+		return err
+	}
+	al.FederatedSession = string(bytes)
+	return nil
+}
+
+func (al *Awslogin) BuildSigninTokenRequestURL() {
+	values := url.Values{}
+	values.Add("Action", "getSigninToken")
+	values.Add("SessionType", "json")
+	values.Add("Session", al.FederatedSession)
+	al.SigninTokenRequestURL = SigninBaseURL + "?" + values.Encode()
+}
+
+func (al *Awslogin) RequestSigninToken() error {
+	resp, err := http.Get(al.SigninTokenRequestURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var signin Signin
+	if err = json.Unmarshal(body, &signin); err != nil {
+		return err
+	}
+	al.SigninToken = signin.Token
+	return nil
+}
+
+func (al *Awslogin) BuildSigninURL() {
+	values := url.Values{}
+	values.Add("Action", "login")
+	values.Add("Issuer", "https://github.com/youyo/awslogin/")
+	values.Add("Destination", "https://console.aws.amazon.com/")
+	values.Add("SigninToken", al.SigninToken)
+	al.SigninUrl = SigninBaseURL + "?" + values.Encode()
+}
+
+func (al *Awslogin) GetSigninUrl() string {
+	return al.SigninUrl
 }
 
 func buildAssumeRoleProvider(roleSessionName, mfaSerial string, durationSeconds int) (f func(p *stscreds.AssumeRoleProvider)) {
@@ -50,53 +131,5 @@ func buildAssumeRoleProvider(roleSessionName, mfaSerial string, durationSeconds 
 			p.TokenProvider = stscreds.StdinTokenProvider
 		}
 	}
-	return
-}
-
-func BuildSigninTokenRequestURL(fs string) (u string) {
-	values := url.Values{}
-	values.Add("Action", "getSigninToken")
-	values.Add("SessionType", "json")
-	values.Add("Session", fs)
-	u = SigninBaseURL + "?" + values.Encode()
-	return
-}
-
-func RequestSigninToken(url string) (st string, err error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	var ST signinToken
-	if err = json.Unmarshal(body, &ST); err != nil {
-		return
-	}
-	st = ST.Token
-	return
-}
-
-func BuildFederatedSession(accessKeyId, secretAccessKey, sessionToken string) (j string, err error) {
-	fs := &federatedSession{
-		SessionID:    accessKeyId,
-		SessionKey:   secretAccessKey,
-		SessionToken: sessionToken,
-	}
-	b, err := json.Marshal(*fs)
-	j = string(b)
-	return
-}
-
-func BuildSigninURL(st string) (u string) {
-	values := url.Values{}
-	values.Add("Action", "login")
-	values.Add("Issuer", "https://github.com/youyo/awslogin/")
-	values.Add("Destination", "https://console.aws.amazon.com/")
-	values.Add("SigninToken", st)
-	u = SigninBaseURL + "?" + values.Encode()
 	return
 }

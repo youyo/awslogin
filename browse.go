@@ -4,12 +4,10 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-func Browsing(url string) (err error) {
-	err = open.Start(url)
-	return
+func Browsing(url string) error {
+	return open.Start(url)
 }
 
-func BrowsingSpecificApp(url, app string) (err error) {
-	err = open.StartWith(url, app)
-	return
+func BrowsingSpecificApp(url, app string) error {
+	return open.StartWith(url, app)
 }

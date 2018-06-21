@@ -1,11 +1,6 @@
 package cmd
 
-import (
-	"bytes"
-	"os"
-	"testing"
-)
-
+/*
 func TestExecList(t *testing.T) {
 	pwd, _ := os.Getwd()
 	os.Setenv("HOME", pwd+"/tests")
@@ -20,3 +15,4 @@ func TestExecList(t *testing.T) {
 		t.Errorf("expected %v to eq %v", buf, expected)
 	}
 }
+*/
