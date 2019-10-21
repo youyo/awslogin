@@ -24,5 +24,5 @@ package main
 import "github.com/youyo/awslogin/awslogin/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }

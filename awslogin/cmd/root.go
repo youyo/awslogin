@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/youyo/awslogin"
-	"github.com/youyo/awssh"
 )
 
 var Version string
@@ -16,7 +15,7 @@ var rootCmd = &cobra.Command{
 	Use:          "awslogin",
 	Short:        "Login to the AWS management console.",
 	Version:      Version,
-	PreRunE:      awssh.PreRun,
+	PreRunE:      awslogin.PreRun,
 	RunE:         awslogin.Run,
 	SilenceUsage: true,
 }
