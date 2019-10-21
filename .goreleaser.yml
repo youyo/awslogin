@@ -1,0 +1,53 @@
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - main: ./awslogin/main.go
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      -X github.com/youyo/awslogin/awslogin/cmd.Version={{ .Version }}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+archives:
+  - id: github release
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      amd64: x86_64
+    files:
+      - LICENSE
+      - README.md
+      - _awslogin
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+brews:
+  -
+    github:
+      owner: youyo
+      name: homebrew-tap
+    folder: Formula
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@carlosbecker.com
+    description: "Login to the AWS management console."
+    homepage: "https://github.com/youyo/awslogin"
+    install: |
+      bin.install "awslogin"
+      zsh_completion.install '_awslogin'
+    test: |
+      system "#{bin}/awslogin --version"

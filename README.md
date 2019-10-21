@@ -1,94 +1,85 @@
 # awslogin
 
-[![CircleCI](https://circleci.com/gh/youyo/awslogin.svg?style=svg)](https://circleci.com/gh/youyo/awslogin)
+[![Go Report Card](https://goreportcard.com/badge/github.com/youyo/awslogin)](https://goreportcard.com/report/github.com/youyo/awslogin)
 
 ## Description
 
-Using AssumeRole, accept IAMRole and log in to the AWS management console.
-
-## Usage
-
-- Print Help.
-
-```bash
-$ awslogin -h
-Using AssumeRole, accept IAMRole and login to the AWS management console.
-
-Usage:
-  awslogin [flags]
-  awslogin [command]
-
-Available Commands:
-  help        Help about any command
-  list        List profiles
-  version     Show version
-
-Flags:
-  -a, --app string             Opens with the specified application.
-  -d, --duration-seconds int   Request a session duration seconds. 900 - 43200 (default 3600)
-  -h, --help                   help for awslogin
-  -p, --profile string         Use a specific profile.
-  -e, --read-from-env          Use a specific profile read from the environment. [$AWS_PROFILE]
-
-Use "awslogin [command] --help" for more information about a command.
-```
-
-- Login AWS management console.
-
-```bash
-$ awslogin
-(open browser)
-```
-
-- Login AWS management console using a specific profile.
-
-```bash
-$ awslogin -p profile-1
-(open browser)
-```
-
-- Login AWS management console using a specific profile read from the environment.
-
-```bash
-$ export AWS_PROFILE=profile-1
-$ awslogin -e
-(open browser)
-```
-
-- Print Arns.
-
-```bash
-$ awslogin list
-test
-profile-1
-profile-2
-```
-
----
+Login to the AWS management console.
 
 ## Install
 
-- Configure AWS CLI [default profile]. http://docs.aws.amazon.com/streams/latest/dev/kinesis-tutorial-cli-installation.html#config-cli
-- Configure using Assume role. http://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html
-- If use to MFA, please set `mfa_serial` parameter.
-- Install awslogin command
+- Brew
 
-```bash
-$ brew tap youyo/awslogin
+```
+$ brew tap youyo/tap
 $ brew install awslogin
 ```
 
-## Contribution
+Other platforms are download from [github release page](https://github.com/youyo/awslogin/releases).
 
-1. Fork ([https://github.com/youyo/awslogin/fork](https://github.com/youyo/awslogin/fork))
-1. Create a feature branch
-1. Setup Environment `make setup && make deps`
-1. Write code
-1. Run `gofmt -s`
-1. Execute test `make test`
-1. Commit your changes
-1. Rebase your local changes against the master branch
-1. Create a new Pull Request
+## Usage
+
+```bash
+$ awslogin
+Login to the AWS management console.
+
+Usage:
+  awslogin [flags]
+
+Flags:
+  -b, --browser string   Opens with the specified browse application
+  -c, --cache            enable cache a credentials.
+  -h, --help             help for awslogin
+  -O, --output-url       output signin url
+  -p, --profile string   use a specific profile from your credential file. (default "default")
+  -S, --select-profile   interactive select profile
+      --version          version for awslogin
+```
+
+### Login AWS management console.
+
+```bash
+$ awslogin
+(open browser using default profile or $AWS_PROFILE)
+```
+
+### Login AWS management console using a specific profile.
+
+```bash
+$ awslogin --profile profile-1
+(open browser using selected profile)
+```
+
+### Login AWS management console using interactive select.
+
+```bash
+$ awslogin --select-profile
+(open browser using selected profile)
+```
+
+### Enable cache.
+
+If you use mfa authentication, it may be difficult to authenticate each time. `--cache` option caches credentials and reuses it next time. Cache file is create to `~/.config/awslogin/cache/*` .
+
+```bash
+$ awslogin --cache --profile profile-1
+Assume Role MFA token code: 000000
+(open browser. require mfa.)
+
+$ awslogin --cache --profile profile-1
+(skip authentication and open browser)
+
+$ awslogin --cache --profile profile-2
+Assume Role MFA token code: 000000
+(open browser. require mfa. because another profile.)
+```
+
+### Output SigninURL.
+
+```bash
+$ awslogin --output-url
+https://signin.aws.amazon.com/federation?Action=...
+```
 
 ## Author
 

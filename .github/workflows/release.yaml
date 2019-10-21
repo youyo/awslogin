@@ -1,0 +1,22 @@
+name: goreleaser
+
+on:
+  create:
+    tags:
+      - '*'
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+      GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_GITHUB }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-go@master
+        with:
+          go-version: 1.13
+      - uses: goreleaser/goreleaser-action@master
+        with:
+          version: latest
+          args: release
