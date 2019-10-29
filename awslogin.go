@@ -38,23 +38,24 @@ func NewAwsSession(profile string, cache bool, cachePath string) (sess *session.
 		}
 
 	} else {
-		sess = newAwsSession(profile)
+		sess, err = newAwsSession(profile)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return sess, nil
 }
 
-func newAwsSession(profile string) (sess *session.Session) {
-	sess = session.Must(
-		session.NewSessionWithOptions(
-			session.Options{
-				SharedConfigState:       session.SharedConfigEnable,
-				Profile:                 profile,
-				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
-			},
-		),
+func newAwsSession(profile string) (sess *session.Session, err error) {
+	sess, err = session.NewSessionWithOptions(
+		session.Options{
+			SharedConfigState:       session.SharedConfigEnable,
+			Profile:                 profile,
+			AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
+		},
 	)
-	return sess
+	return sess, err
 }
 
 func newAwsSessionWithCreds(profile string, creds *credentials.Credentials) (sess *session.Session) {
@@ -80,7 +81,10 @@ func newAwsSessionWithCache(profile, cachePath string) (sess *session.Session, e
 	}
 
 	if cachedCreds, err := c.Load(); err != nil {
-		sess = newAwsSession(profile)
+		sess, err = newAwsSession(profile)
+		if err != nil {
+			return nil, err
+		}
 
 		creds, err := sess.Config.Credentials.Get()
 		if err != nil {
@@ -153,6 +157,7 @@ func BuildSigninURL(signinToken string) (signinUrl string) {
 	values.Add("Issuer", "https://github.com/youyo/awslogin/")
 	values.Add("Destination", "https://console.aws.amazon.com/")
 	values.Add("SigninToken", signinToken)
+	values.Add("SessionDuration", "43200")
 	signinUrl = SigninBaseURL + "?" + values.Encode()
 
 	return signinUrl
