@@ -5,9 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 )
@@ -30,70 +29,18 @@ type (
 )
 
 // NewAwsSession
-func NewAwsSession(profile string, cache bool, cachePath string) (sess *session.Session, err error) {
-	if cache {
-		sess, err = newAwsSessionWithCache(profile, cachePath)
-		if err != nil {
-			return nil, err
-		}
-
-	} else {
-		sess = newAwsSession(profile)
-	}
-
-	return sess, nil
-}
-
-func newAwsSession(profile string) (sess *session.Session) {
+func NewAwsSession(profile string, durationSeconds time.Duration) (sess *session.Session) {
 	sess = session.Must(
 		session.NewSessionWithOptions(
 			session.Options{
 				SharedConfigState:       session.SharedConfigEnable,
 				Profile:                 profile,
+				AssumeRoleDuration:      durationSeconds,
 				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
 			},
 		),
 	)
 	return sess
-}
-
-func newAwsSessionWithCreds(profile string, creds *credentials.Credentials) (sess *session.Session) {
-	sess = session.Must(
-		session.NewSessionWithOptions(
-			session.Options{
-				Config: aws.Config{
-					Credentials: creds,
-				},
-				SharedConfigState:       session.SharedConfigEnable,
-				Profile:                 profile,
-				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
-			},
-		),
-	)
-	return sess
-}
-
-func newAwsSessionWithCache(profile, cachePath string) (sess *session.Session, err error) {
-	c, err := NewCache(cachePath, profile)
-	if err != nil {
-		return nil, err
-	}
-
-	if cachedCreds, err := c.Load(); err != nil {
-		sess = newAwsSession(profile)
-
-		creds, err := sess.Config.Credentials.Get()
-		if err != nil {
-			return nil, err
-		}
-
-		c.Save(&creds)
-	} else {
-		creds := credentials.NewStaticCredentialsFromCreds(*cachedCreds)
-		sess = newAwsSessionWithCreds(profile, creds)
-	}
-
-	return sess, nil
 }
 
 func BuildTemporaryCredentials(sess *session.Session) (temporaryCredentials string, err error) {
@@ -116,11 +63,12 @@ func BuildTemporaryCredentials(sess *session.Session) (temporaryCredentials stri
 	return string(tempCredsByte), nil
 }
 
-func BuildSigninTokenRequestURL(temporaryCredentials string) (requestUrl string) {
+func BuildSigninTokenRequestURL(temporaryCredentials, durationSeconds string) (requestUrl string) {
 	values := url.Values{}
 	values.Add("Action", "getSigninToken")
 	values.Add("SessionType", "json")
 	values.Add("Session", temporaryCredentials)
+	values.Add("SessionDuration", durationSeconds)
 	requestUrl = SigninBaseURL + "?" + values.Encode()
 	return requestUrl
 }

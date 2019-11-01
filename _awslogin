@@ -2,9 +2,8 @@
 
 _awslogin() {
 	_arguments -w \
-		'(- *)'{-h,--help}'[help for awslogin]' \
+		'(-h --help)'{-h,--help}'[help for awslogin]' \
 		'(-b --browser)'{-b,--browser}'[Opens with the specified browse application]' \
-		'(-c --cache)'{-c,--cache}'[enable cache a credentials.]' \
 		'(-O --output-url)'{-O,--output-url}'[output signin url]' \
 		'(-p --profile)'{-p,--profile}'[use a specific profile from your credential file. (default "default")]' \
 		'(-S --select-profile)'{-S,--select-profile}'[interactive select profile]' \

@@ -1,9 +1,11 @@
 name: goreleaser
 
 on:
-  create:
+  push:
+    branches:
+      - "!**/*"
     tags:
-      - '*'
+      - "v*"
 
 jobs:
   goreleaser:
