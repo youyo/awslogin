@@ -31,7 +31,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().BoolP("select-profile", "S", false, "interactive select profile")
-	rootCmd.Flags().BoolP("cache", "c", false, "enable cache a credentials.")
 	rootCmd.Flags().StringP("profile", "p", "default", "use a specific profile from your credential file.")
 	rootCmd.Flags().StringP("browser", "b", "", "Opens with the specified browse application")
 	rootCmd.Flags().BoolP("output-url", "O", false, "output signin url")

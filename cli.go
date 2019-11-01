@@ -1,7 +1,9 @@
 package awslogin
 
 import (
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -10,28 +12,21 @@ import (
 	"github.com/youyo/awsprofile"
 )
 
-const (
-	CachePath string = "~/.config/awslogin/cache"
-)
-
 // Run
 func Run(cmd *cobra.Command, args []string) (err error) {
 	profile := viper.GetString("profile")
+	durationSeconds := viper.GetInt("duration_seconds")
 	browser := viper.GetString("browser")
-	cache := viper.GetBool("cache")
 	outputUrl := viper.GetBool("output-url")
 
-	awsSession, err := NewAwsSession(profile, cache, CachePath)
-	if err != nil {
-		return err
-	}
+	awsSession := NewAwsSession(profile, time.Duration(durationSeconds)*time.Second)
 
 	temporaryCredentials, err := BuildTemporaryCredentials(awsSession)
 	if err != nil {
 		return err
 	}
 
-	requestUrl := BuildSigninTokenRequestURL(temporaryCredentials)
+	requestUrl := BuildSigninTokenRequestURL(temporaryCredentials, strconv.Itoa(durationSeconds))
 
 	signinToken, err := RequestSigninToken(requestUrl)
 	if err != nil {
@@ -56,14 +51,19 @@ func Run(cmd *cobra.Command, args []string) (err error) {
 
 func PreRun(cmd *cobra.Command, args []string) (err error) {
 	selectProfile := viper.GetBool("select-profile")
+
+	configs := awsprofile.NewConfigs()
+	file, err := awsprofile.GetConfigsPath()
+	if err != nil {
+		return err
+	}
+
+	if err := configs.Parse(file); err != nil {
+		return err
+	}
+
 	if selectProfile {
-		awsProfile := awsprofile.New()
-
-		if err := awsProfile.Parse(); err != nil {
-			return err
-		}
-
-		profiles, err := awsProfile.ProfileNames()
+		profiles, err := configs.ProfileNames()
 		if err != nil {
 			return err
 		}
@@ -96,6 +96,21 @@ func PreRun(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		viper.Set("profile", profiles[index])
+	}
+
+	for _, config := range *configs {
+		if config.ProfileName == viper.GetString("profile") {
+
+			durationSeconds := config.GetDurationSeconds()
+
+			if durationSeconds != 0 {
+				viper.Set("duration_seconds", durationSeconds)
+			} else {
+				viper.Set("duration_seconds", 3600)
+			}
+
+			break
+		}
 	}
 
 	return nil
