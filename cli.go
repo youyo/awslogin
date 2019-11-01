@@ -33,7 +33,7 @@ func Run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	signinUrl := BuildSigninURL(signinToken)
+	signinUrl := BuildSigninURL(signinToken, *awsSession.Config.Region)
 
 	if outputUrl {
 		cmd.Println(signinUrl)

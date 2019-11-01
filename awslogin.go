@@ -95,11 +95,11 @@ func RequestSigninToken(requestUrl string) (signinToken string, err error) {
 	return signinToken, nil
 }
 
-func BuildSigninURL(signinToken string) (signinUrl string) {
+func BuildSigninURL(signinToken, region string) (signinUrl string) {
 	values := url.Values{}
 	values.Add("Action", "login")
 	values.Add("Issuer", "https://github.com/youyo/awslogin/")
-	values.Add("Destination", "https://console.aws.amazon.com/")
+	values.Add("Destination", "https://"+region+".console.aws.amazon.com/")
 	values.Add("SigninToken", signinToken)
 	signinUrl = SigninBaseURL + "?" + values.Encode()
 
