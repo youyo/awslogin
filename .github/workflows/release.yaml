@@ -1,9 +1,7 @@
 name: goreleaser
 
 on:
-  push:
-    branches:
-      - "!**/*"
+  create:
     tags:
       - "v*"
 
