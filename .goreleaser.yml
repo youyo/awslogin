@@ -38,7 +38,7 @@ changelog:
 
 brews:
   -
-    github:
+    tap:
       owner: youyo
       name: homebrew-tap
     folder: Formula
