@@ -1,66 +1,73 @@
 # awslogin
 
+[![Test](https://github.com/youyo/awslogin/actions/workflows/test.yml/badge.svg)](https://github.com/youyo/awslogin/actions/workflows/test.yml)
+[![Lint](https://github.com/youyo/awslogin/actions/workflows/lint.yml/badge.svg)](https://github.com/youyo/awslogin/actions/workflows/lint.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/youyo/awslogin)](https://goreportcard.com/report/github.com/youyo/awslogin)
 
-## Description
-
-Login to the AWS management console.
+AWS の認証情報から AWS マネジメントコンソールのログイン URL を生成する CLI ツールです。
 
 ## Install
 
-- Brew
+### Homebrew
 
-```
-$ brew install youyo/tap/awslogin
+```bash
+brew install youyo/tap/awslogin
 ```
 
-Other platforms are download from [github release page](https://github.com/youyo/awslogin/releases).
+### GitHub Releases
+
+[Releases ページ](https://github.com/youyo/awslogin/releases) からお使いの OS/アーキテクチャに合ったバイナリをダウンロードしてください。
+
+対応プラットフォーム: darwin/linux/windows (amd64/arm64)
 
 ## Usage
 
 ```bash
-$ awslogin
-Login to the AWS management console.
+# ログイン URL を stdout に出力（デフォルト）
+awslogin
 
-Usage:
-  awslogin [flags]
+# ブラウザで直接開く
+awslogin --open
+awslogin -o
 
-Flags:
-  -b, --browser string   Opens with the specified browse application
-  -h, --help             help for awslogin
-  -O, --output-url       output signin url
-  -p, --profile string   use a specific profile from your credential file. (default "default")
-  -S, --select-profile   interactive select profile
-      --version          version for awslogin
+# セッション有効期間を指定（秒）
+awslogin --duration 7200
+awslogin -d 7200
+
+# プロファイルを指定（環境変数）
+AWS_PROFILE=production awslogin
+
+# バージョン表示
+awslogin version
+
+# シェル補完の設定
+eval "$(awslogin completion zsh)"   # zsh
+eval "$(awslogin completion bash)"  # bash
 ```
 
-### Login AWS management console.
+## v2 からの移行ガイド
 
-```bash
-$ awslogin
-(open browser using default profile or $AWS_PROFILE)
-```
+v3.0.0 は破壊的変更を含みます。
 
-### Login AWS management console using a specific profile.
+| v2 | v3 | 変更理由 |
+|----|-----|---------|
+| デフォルトでブラウザオープン | デフォルトで URL を stdout 出力 | パイプライン連携しやすい設計に変更 |
+| `--output-url` (`-O`) で URL 出力 | デフォルト動作（フラグ不要） | URL 出力がメイン機能 |
+| `--profile` (`-p`) | `AWS_PROFILE` 環境変数 | AWS SDK 標準に準拠 |
+| `--select-profile` (`-S`) | 削除 | インタラクティブ UI 廃止 |
+| `--browser` (`-b`) | 削除 | デフォルトブラウザのみサポート |
+| `--version` フラグ | `awslogin version` サブコマンド | Kong CLI フレームワークの標準に合わせて変更 |
 
-```bash
-$ awslogin --profile profile-1
-(open browser using selected profile)
-```
+### 主な変更点
 
-### Login AWS management console using interactive select.
+- **CLI フレームワーク**: Cobra + Viper → [Kong](https://github.com/alecthomas/kong)
+- **AWS SDK**: v1 → v2
+- **MFA/SSO**: AWS SDK v2 に委譲（独自実装を削除）
+- **シェル補完**: 静的ファイル(`_awslogin`) → `awslogin completion` サブコマンド
 
-```bash
-$ awslogin --select-profile
-(open browser using selected profile)
-```
+## License
 
-### Output SigninURL.
-
-```bash
-$ awslogin --output-url
-https://signin.aws.amazon.com/federation?Action=...
-```
+[MIT](LICENSE)
 
 ## Author
 
