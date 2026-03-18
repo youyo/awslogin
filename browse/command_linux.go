@@ -1,9 +1,9 @@
-//go:build darwin
+//go:build linux
 
 package browse
 
 import "os/exec"
 
 func openURL(url string) *exec.Cmd {
-	return exec.Command("open", url)
+	return exec.Command("xdg-open", url)
 }

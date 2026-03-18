@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/youyo/awslogin/browse"
 	"github.com/youyo/awslogin/internal/signin"
 )
 
@@ -42,7 +43,10 @@ func (c *LoginCmd) Run(globals *Globals) error {
 	// 5. ログイン URL 生成
 	signinURL := signin.BuildSigninURL(signinToken, creds.Region)
 
-	// 6. stdout 出力（--open 時のブラウザオープンは M2 で実装）
+	// 6. 出力: --open 時はブラウザで開く、それ以外は stdout に出力
+	if globals.Open {
+		return browse.Start(signinURL)
+	}
 	fmt.Println(signinURL)
 
 	return nil

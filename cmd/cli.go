@@ -15,6 +15,7 @@ type Globals struct {
 type CLI struct {
 	Globals
 
-	Login   LoginCmd   `cmd:"" default:"withargs" help:"Generate AWS console login URL."`
-	Version VersionCmd `cmd:"" help:"Show version information."`
+	Login      LoginCmd      `cmd:"" default:"withargs" help:"Generate AWS console login URL."`
+	Version    VersionCmd    `cmd:"" help:"Show version information."`
+	Completion CompletionCmd `cmd:"" help:"Generate shell completion script."`
 }
