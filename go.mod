@@ -1,6 +1,6 @@
 module github.com/youyo/awslogin
 
-go 1.24
+go 1.26
 
 require (
 	github.com/alecthomas/kong v1.14.0
