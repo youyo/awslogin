@@ -121,6 +121,40 @@ eval "$(awslogin completion bash)"
 
 永続化するにはシェルの設定ファイル（`~/.zshrc` / `~/.bashrc`）に追加する。
 
+## SSO プロファイルのサポート
+
+awslogin は新形式の `sso-session` で設定された AWS SSO プロファイルに対応しています。
+
+SSO セッションが期限切れの場合、awslogin は `InvalidGrantException` を自動検出し、OIDC デバイス認証フローを起動します。
+
+1. ブラウザが自動で開く
+2. 認証コードが表示される — ブラウザ上で確認・承認する
+3. 認証完了後、awslogin が自動リトライしてコンソール URL を生成する
+
+**対応しているのは新形式 `[sso-session]` のみです。** `sso_start_url` を直接指定したレガシー形式のプロファイルは移行ガイドエラーを返します。
+
+### `~/.aws/config` の設定例
+
+```ini
+[profile my-sso]
+sso_session = my-sso
+sso_account_id = 123456789012
+sso_role_name = AdministratorAccess
+region = ap-northeast-1
+
+[sso-session my-sso]
+sso_start_url = https://my-org.awsapps.com/start
+sso_region = ap-northeast-1
+sso_registration_scopes = sso:account:access
+```
+
+```bash
+# 初回実行またはセッション期限切れ時: ブラウザが自動で開く
+AWS_PROFILE=my-sso awslogin
+# SSO session expired. Starting SSO login...
+# https://signin.aws.amazon.com/federation?...
+```
+
 ## v2 からの移行
 
 v3.0.0 は破壊的変更を含む。

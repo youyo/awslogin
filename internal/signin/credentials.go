@@ -3,21 +3,22 @@ package signin
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/youyo/awslogin/internal/sso"
 )
 
 // AWSCredentials は AWS 認証情報とリージョン情報を保持する
 type AWSCredentials struct {
-	AccessKeyID    string
+	AccessKeyID     string
 	SecretAccessKey string
-	SessionToken   string
-	Region         string
+	SessionToken    string
+	Region          string
 }
 
-// LoadCredentials は AWS SDK v2 で認証情報とリージョンを取得する。
-// AWS_PROFILE 環境変数、~/.aws/credentials、IAM ロール等、SDK の config loader が自動解決する。
-func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
+// loadCredentialsOnce は AWS SDK v2 で認証情報とリージョンを一度取得する内部関数。
+func loadCredentialsOnce(ctx context.Context) (*AWSCredentials, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS config: %w", err)
@@ -29,9 +30,39 @@ func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
 	}
 
 	return &AWSCredentials{
-		AccessKeyID:    creds.AccessKeyID,
+		AccessKeyID:     creds.AccessKeyID,
 		SecretAccessKey: creds.SecretAccessKey,
-		SessionToken:   creds.SessionToken,
-		Region:         ResolveRegion(cfg.Region),
+		SessionToken:    creds.SessionToken,
+		Region:          ResolveRegion(cfg.Region),
 	}, nil
+}
+
+// LoadCredentials は AWS SDK v2 で認証情報とリージョンを取得する。
+// AWS_PROFILE 環境変数、~/.aws/credentials、IAM ロール等、SDK の config loader が自動解決する。
+// SSO セッションが期限切れ（InvalidGrantException）の場合は OIDC デバイス認証フローを起動して再試行する。
+func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
+	result, err := loadCredentialsOnce(ctx)
+	if err == nil {
+		return result, nil
+	}
+
+	// InvalidGrantException でなければそのままエラーを返す
+	if !sso.IsInvalidGrantError(err) {
+		return nil, err
+	}
+
+	// SSO プロファイルか確認する
+	ssoCfg, ssoErr := sso.LoadSSOConfig(ctx)
+	if ssoCfg == nil || ssoErr != nil {
+		return nil, err
+	}
+
+	// SSO セッション期限切れ → OIDC デバイス認証フローを起動
+	fmt.Fprintln(os.Stderr, "SSO session expired. Starting SSO login...")
+	if loginErr := sso.Login(ctx); loginErr != nil {
+		return nil, fmt.Errorf("SSO login failed: %w", loginErr)
+	}
+
+	// ログイン成功後にリトライ（1回のみ）
+	return loadCredentialsOnce(ctx)
 }

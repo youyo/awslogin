@@ -121,6 +121,40 @@ eval "$(awslogin completion bash)"
 
 Add the line to your `~/.zshrc` or `~/.bashrc` to persist it.
 
+## SSO Profile Support
+
+awslogin supports AWS SSO profiles configured with the modern `sso-session` format.
+
+When your SSO session has expired, awslogin automatically detects the `InvalidGrantException` and starts the OIDC device authorization flow:
+
+1. A browser window opens automatically
+2. An authorization code is displayed — confirm it in the browser
+3. After successful authentication, awslogin retries and generates the console URL
+
+**Only the modern `[sso-session]` format is supported.** Legacy profiles with a bare `sso_start_url` key will receive a migration error.
+
+### Example `~/.aws/config`
+
+```ini
+[profile my-sso]
+sso_session = my-sso
+sso_account_id = 123456789012
+sso_role_name = AdministratorAccess
+region = ap-northeast-1
+
+[sso-session my-sso]
+sso_start_url = https://my-org.awsapps.com/start
+sso_region = ap-northeast-1
+sso_registration_scopes = sso:account:access
+```
+
+```bash
+# First run or after session expiry: browser opens automatically
+AWS_PROFILE=my-sso awslogin
+# SSO session expired. Starting SSO login...
+# https://signin.aws.amazon.com/federation?...
+```
+
 ## Migrating from v2
 
 v3.0.0 includes breaking changes.
