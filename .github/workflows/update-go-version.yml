@@ -1,0 +1,76 @@
+name: Update Go Version
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current Go version from go.mod
+        id: current
+        run: |
+          VER=$(grep '^go ' go.mod | awk '{print $2}')
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Get latest stable Go version
+        id: latest
+        run: |
+          VER=$(curl -s 'https://go.dev/dl/?mode=json' | jq -r '.[0].version' | sed 's/^go//')
+          MINOR=$(echo "$VER" | grep -oE '^[0-9]+\.[0-9]+')
+          echo "version=$MINOR" >> "$GITHUB_OUTPUT"
+          echo "full_version=$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Check if update is needed
+        id: check
+        run: |
+          if [ "${{ steps.current.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update go.mod
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          sed -i "s/^go .*/go ${{ steps.latest.outputs.version }}/" go.mod
+
+      - name: Update mise.toml
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          sed -i "s/^go = \".*\"/go = \"${{ steps.latest.outputs.version }}\"/" mise.toml
+
+      - name: Run go mod tidy
+        if: steps.check.outputs.needed == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{ steps.latest.outputs.version }}"
+
+      - name: Tidy modules
+        if: steps.check.outputs.needed == 'true'
+        run: go mod tidy
+
+      - name: Create Pull Request
+        if: steps.check.outputs.needed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: Go ${{ steps.latest.outputs.version }} にアップデート"
+          title: "chore: Go ${{ steps.current.outputs.version }} → ${{ steps.latest.outputs.version }}"
+          body: |
+            Go ${{ steps.latest.outputs.full_version }} がリリースされました。
+
+            ## 変更内容
+            - `go.mod`: go ディレクティブを ${{ steps.latest.outputs.version }} に更新
+            - `mise.toml`: Go バージョンを ${{ steps.latest.outputs.version }} に更新
+            - `go mod tidy` 実行済み
+          branch: update-go-${{ steps.latest.outputs.version }}
+          labels: dependencies,go

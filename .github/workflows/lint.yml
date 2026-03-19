@@ -13,8 +13,13 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Get golangci-lint version from mise.toml
+        id: lint-version
+        run: |
+          VER=$(grep 'golangci-lint' mise.toml | sed 's/.*"\(.*\)"/\1/')
+          echo "version=v$VER" >> "$GITHUB_OUTPUT"
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.11.3
+          version: ${{ steps.lint-version.outputs.version }}
           args: --timeout=120s
