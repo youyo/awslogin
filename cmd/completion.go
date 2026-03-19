@@ -21,13 +21,14 @@ func (c *CompletionCmd) Run() error {
 
 	switch c.Shell {
 	case "bash":
-		fmt.Fprint(w, bashCompletionScript)
+		_, err := fmt.Fprint(w, bashCompletionScript)
+		return err
 	case "zsh":
-		fmt.Fprint(w, zshCompletionScript)
+		_, err := fmt.Fprint(w, zshCompletionScript)
+		return err
 	default:
 		return fmt.Errorf("unsupported shell: %s", c.Shell)
 	}
-	return nil
 }
 
 const bashCompletionScript = `_awslogin_completions() {

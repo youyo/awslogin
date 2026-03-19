@@ -118,7 +118,7 @@ func TestBuildSigninURL_EmptyRegionFallback(t *testing.T) {
 
 func TestRequestSigninToken_Success(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"SigninToken":"test-token-123"}`))
+		_, _ = w.Write([]byte(`{"SigninToken":"test-token-123"}`))
 	}))
 	defer ts.Close()
 
@@ -133,7 +133,7 @@ func TestRequestSigninToken_Success(t *testing.T) {
 
 func TestRequestSigninToken_InvalidJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`not json`))
+		_, _ = w.Write([]byte(`not json`))
 	}))
 	defer ts.Close()
 
@@ -146,7 +146,7 @@ func TestRequestSigninToken_InvalidJSON(t *testing.T) {
 func TestRequestSigninToken_HTTPError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte(`{"Error":"AccessDenied"}`))
+		_, _ = w.Write([]byte(`{"Error":"AccessDenied"}`))
 	}))
 	defer ts.Close()
 
