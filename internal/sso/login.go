@@ -10,6 +10,8 @@ import (
 	"github.com/youyo/awslogin/browse"
 )
 
+const defaultExpiresInSeconds int32 = 3600
+
 // Login は SSO OIDC デバイス認証フローを実行してトークンをキャッシュする
 func Login(ctx context.Context) error {
 	cfg, err := LoadSSOConfig(ctx)
@@ -41,7 +43,7 @@ func Login(ctx context.Context) error {
 
 	expiresIn := result.ExpiresIn
 	if expiresIn <= 0 {
-		expiresIn = 3600 // デフォルト 1 時間
+		expiresIn = defaultExpiresInSeconds
 	}
 
 	token := &CachedToken{

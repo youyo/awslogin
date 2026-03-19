@@ -12,6 +12,14 @@ import (
 	ssooidctypes "github.com/aws/aws-sdk-go-v2/service/ssooidc/types"
 )
 
+const (
+	oidcClientName              = "awslogin"
+	oidcClientType              = "public"
+	oidcScope                   = "sso:account:access"
+	oidcGrantType               = "urn:ietf:params:oauth:grant-type:device_code"
+	defaultPollInterval   int32 = 5
+)
+
 // OIDCClient は SSO OIDC API のインターフェース（テスト用 mock 対応）
 type OIDCClient interface {
 	RegisterClient(ctx context.Context, params *ssooidc.RegisterClientInput, optFns ...func(*ssooidc.Options)) (*ssooidc.RegisterClientOutput, error)
@@ -32,9 +40,9 @@ type DeviceAuthResult struct {
 func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, openBrowser func(string) error) (*DeviceAuthResult, error) {
 	// 1. RegisterClient
 	regOut, err := client.RegisterClient(ctx, &ssooidc.RegisterClientInput{
-		ClientName: aws.String("awslogin"),
-		ClientType: aws.String("public"),
-		Scopes:     []string{"sso:account:access"},
+		ClientName: aws.String(oidcClientName),
+		ClientType: aws.String(oidcClientType),
+		Scopes:     []string{oidcScope},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to register client: %w", err)
@@ -73,11 +81,10 @@ func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, o
 	// テストでは mock が Interval=0 を返すことで time.After(0) = 即時となり高速化できる。
 	interval := authOut.Interval
 	if interval < 0 {
-		interval = 5
+		interval = defaultPollInterval
 	}
 
 	deviceCode := aws.ToString(authOut.DeviceCode)
-	grantType := "urn:ietf:params:oauth:grant-type:device_code"
 
 	for {
 		select {
@@ -90,7 +97,7 @@ func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, o
 			ClientId:     regOut.ClientId,
 			ClientSecret: regOut.ClientSecret,
 			DeviceCode:   aws.String(deviceCode),
-			GrantType:    aws.String(grantType),
+			GrantType:    aws.String(oidcGrantType),
 		})
 		if err != nil {
 			var authPending *ssooidctypes.AuthorizationPendingException
@@ -101,7 +108,7 @@ func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, o
 				continue
 			}
 			if errors.As(err, &slowDown) {
-				interval += 5
+				interval += defaultPollInterval
 				continue
 			}
 			if errors.As(err, &expired) {
