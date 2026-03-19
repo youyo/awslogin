@@ -1,6 +1,7 @@
 package signin
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -121,7 +122,7 @@ func TestRequestSigninToken_Success(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	token, err := RequestSigninToken(ts.URL)
+	token, err := RequestSigninToken(context.Background(), ts.URL)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -136,7 +137,7 @@ func TestRequestSigninToken_InvalidJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	_, err := RequestSigninToken(ts.URL)
+	_, err := RequestSigninToken(context.Background(), ts.URL)
 	if err == nil {
 		t.Error("expected error for invalid JSON, got nil")
 	}
@@ -149,7 +150,7 @@ func TestRequestSigninToken_HTTPError(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	_, err := RequestSigninToken(ts.URL)
+	_, err := RequestSigninToken(context.Background(), ts.URL)
 	if err == nil {
 		t.Error("expected error for HTTP 403, got nil")
 	}

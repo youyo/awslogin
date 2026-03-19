@@ -1,12 +1,14 @@
 package signin
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 const (
@@ -58,8 +60,14 @@ func BuildSigninTokenRequestURL(credentials string, durationSeconds int) string 
 
 // RequestSigninToken は Federation API から SigninToken を取得する
 // HTTP ステータスコード 200 以外の場合はエラーを返す
-func RequestSigninToken(requestURL string) (string, error) {
-	resp, err := http.Get(requestURL)
+func RequestSigninToken(ctx context.Context, requestURL string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to request signin token: %w", err)
 	}

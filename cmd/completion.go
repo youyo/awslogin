@@ -24,6 +24,8 @@ func (c *CompletionCmd) Run() error {
 		fmt.Fprint(w, bashCompletionScript)
 	case "zsh":
 		fmt.Fprint(w, zshCompletionScript)
+	default:
+		return fmt.Errorf("unsupported shell: %s", c.Shell)
 	}
 	return nil
 }

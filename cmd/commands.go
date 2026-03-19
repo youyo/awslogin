@@ -18,7 +18,7 @@ func (c *LoginCmd) Run(globals *Globals) error {
 	// 1. AWS 認証情報取得
 	creds, err := signin.LoadCredentials(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to load credentials: %w", err)
+		return err
 	}
 
 	// 2. 一時認証情報 JSON 化
@@ -35,9 +35,9 @@ func (c *LoginCmd) Run(globals *Globals) error {
 	requestURL := signin.BuildSigninTokenRequestURL(temporaryCredentials, globals.Duration)
 
 	// 4. SigninToken 取得
-	signinToken, err := signin.RequestSigninToken(requestURL)
+	signinToken, err := signin.RequestSigninToken(ctx, requestURL)
 	if err != nil {
-		return fmt.Errorf("failed to request signin token: %w", err)
+		return err
 	}
 
 	// 5. ログイン URL 生成
