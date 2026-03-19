@@ -19,7 +19,7 @@ jobs:
           VER=$(grep 'golangci-lint' mise.toml | sed 's/.*"\(.*\)"/\1/')
           echo "version=v$VER" >> "$GITHUB_OUTPUT"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
         with:
           version: ${{ steps.lint-version.outputs.version }}
           args: --timeout=120s
