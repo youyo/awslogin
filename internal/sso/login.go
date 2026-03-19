@@ -39,9 +39,14 @@ func Login(ctx context.Context) error {
 		return fmt.Errorf("failed to determine cache path: %w", err)
 	}
 
+	expiresIn := result.ExpiresIn
+	if expiresIn <= 0 {
+		expiresIn = 3600 // デフォルト 1 時間
+	}
+
 	token := &CachedToken{
 		AccessToken:  result.AccessToken,
-		ExpiresAt:    time.Now().Add(time.Duration(result.ExpiresIn) * time.Second).UTC().Format(time.RFC3339),
+		ExpiresAt:    time.Now().Add(time.Duration(expiresIn) * time.Second).UTC().Format(time.RFC3339),
 		RefreshToken: result.RefreshToken,
 		ClientID:     result.ClientID,
 		ClientSecret: result.ClientSecret,

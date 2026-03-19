@@ -53,7 +53,12 @@ func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
 
 	// SSO プロファイルか確認する
 	ssoCfg, ssoErr := sso.LoadSSOConfig(ctx)
-	if ssoCfg == nil || ssoErr != nil {
+	if ssoErr != nil {
+		// SSO 設定読み込みエラー（レガシー形式検出含む）はそのまま返す
+		return nil, ssoErr
+	}
+	if ssoCfg == nil {
+		// 非 SSO プロファイル → 元のエラーを返す
 		return nil, err
 	}
 
