@@ -88,6 +88,7 @@ on: pull_request
 permissions:
   contents: write
   pull-requests: write
+  workflows: write
 
 jobs:
   auto-merge:
