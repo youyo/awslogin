@@ -50,7 +50,7 @@ jobs:
 
       - name: Run go mod tidy
         if: steps.check.outputs.needed == 'true'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "${{ steps.latest.outputs.version }}"
 
