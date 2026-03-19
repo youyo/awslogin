@@ -47,7 +47,7 @@ func LoadSSOConfig(ctx context.Context) (*SSOConfig, error) {
 				"  sso_session = my-sso\n\n"+
 				"  [sso-session my-sso]\n"+
 				"  sso_start_url = %s\n"+
-				"  sso_region = %s\n",
+				"  sso_region = %s",
 			profile, profile, sharedCfg.SSOStartURL, sharedCfg.SSORegion,
 		)
 	}

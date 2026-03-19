@@ -32,7 +32,7 @@ func TestCacheFilePath(t *testing.T) {
 		base := filepath.Base(path1)
 		name := strings.TrimSuffix(base, ".json")
 		for _, c := range name {
-			if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+			if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
 				t.Errorf("expected lowercase hex filename, got %q", name)
 				break
 			}
@@ -63,7 +63,7 @@ func TestWriteReadToken(t *testing.T) {
 
 	t.Run("N4: WriteToken → ReadToken 往復テスト", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-test-n4")
-		defer os.RemoveAll(dir)
+		defer func() { _ = os.RemoveAll(dir) }()
 
 		path := filepath.Join(dir, "token.json")
 		token := &CachedToken{
@@ -117,7 +117,7 @@ func TestWriteReadToken(t *testing.T) {
 
 	t.Run("E5: ReadToken 壊れた JSON", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-test-e5")
-		defer os.RemoveAll(dir)
+		defer func() { _ = os.RemoveAll(dir) }()
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			t.Fatal(err)
 		}
@@ -133,7 +133,7 @@ func TestWriteReadToken(t *testing.T) {
 
 	t.Run("X4: WriteToken でディレクトリ自動作成", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-test-x4", "nested", "dir")
-		defer os.RemoveAll(filepath.Join(tmpDir, "sso-cache-test-x4"))
+		defer func() { _ = os.RemoveAll(filepath.Join(tmpDir, "sso-cache-test-x4")) }()
 
 		path := filepath.Join(dir, "token.json")
 		token := &CachedToken{
@@ -150,7 +150,7 @@ func TestWriteReadToken(t *testing.T) {
 
 	t.Run("C1: JSON に全フィールドが含まれる", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-test-c1")
-		defer os.RemoveAll(dir)
+		defer func() { _ = os.RemoveAll(dir) }()
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			t.Fatal(err)
 		}
@@ -187,7 +187,7 @@ func TestWriteReadToken(t *testing.T) {
 
 	t.Run("C3: expiresAt が RFC3339 形式で往復する", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-test-c3")
-		defer os.RemoveAll(dir)
+		defer func() { _ = os.RemoveAll(dir) }()
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			t.Fatal(err)
 		}
@@ -228,7 +228,7 @@ func TestCacheFilePermissions(t *testing.T) {
 
 	t.Run("ファイルパーミッション 0600", func(t *testing.T) {
 		dir := filepath.Join(tmpDir, "sso-cache-perm-test")
-		defer os.RemoveAll(dir)
+		defer func() { _ = os.RemoveAll(dir) }()
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			t.Fatal(err)
 		}
