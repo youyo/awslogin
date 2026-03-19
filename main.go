@@ -6,17 +6,11 @@ import (
 )
 
 // goreleaser ldflags で埋め込まれる
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-)
+var version = "dev"
 
 func main() {
 	var cli cmd.CLI
 	cli.AppVersion = version
-	cli.Commit = commit
-	cli.Date = date
 
 	ctx := kong.Parse(&cli,
 		kong.Name("awslogin"),

@@ -57,7 +57,6 @@ type VersionCmd struct{}
 
 // Run はバージョン情報を出力する
 func (c *VersionCmd) Run(globals *Globals) error {
-	fmt.Printf("awslogin version %s (commit %s, built %s)\n",
-		globals.AppVersion, globals.Commit, globals.Date)
+	fmt.Printf("awslogin version %s\n", globals.AppVersion)
 	return nil
 }
