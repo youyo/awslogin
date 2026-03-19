@@ -5,7 +5,3 @@ linters:
     govet:
       disable:
         - fieldalignment
-issues:
-  exclude-dirs:
-    - plans
-    - docs
