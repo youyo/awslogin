@@ -19,10 +19,9 @@ ecspresso (kayac/ecspresso) は Dependabot で週次の gomod 更新 PR を自�
 ### 実装範囲
 - Dependabot 設定 (gomod 週次 + github-actions 月次)
 - AWS SDK Go v2 パッケージのグループ化 (1 PR にまとめる)
-- Dependabot PR の自動マージワークフロー
+- ~~Dependabot PR の自動マージワークフロー~~ → 削除（手動マージに変更）
 - Go バージョン自動更新ワークフロー (go.mod + mise.toml 同期)
 - lint.yml の golangci-lint バージョンを mise.toml から動的取得に変更
-- GitHub リポジトリ設定変更の手順書
 
 ### スコープ外
 - golangci-lint の自動バージョン更新 (mise.toml + lint.yml の2箇所同期が必要で複雑。将来対応)
