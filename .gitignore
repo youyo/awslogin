@@ -18,3 +18,4 @@ dist/
 pkg/
 vendor/
 awslogin/awslogin
+.claude/handover/
