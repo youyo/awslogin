@@ -14,6 +14,7 @@ AWS の一時認証情報からマネジメントコンソールのログイン 
 - AWS 一時認証情報からコンソールログイン URL を生成
 - `--open` でデフォルトブラウザから直接ログイン
 - `--duration` でセッション有効期間を指定
+- 環境変数でデフォルト値を設定可能（`AWSLOGIN_DURATION`, `AWSLOGIN_OPEN`）
 - bash / zsh シェル補完
 - クロスプラットフォーム対応（macOS / Linux / Windows, amd64 / arm64）
 
@@ -79,6 +80,27 @@ AWS CLI と同じく `AWS_PROFILE` 環境変数を使う。
 ```bash
 AWS_PROFILE=production awslogin
 AWS_PROFILE=staging awslogin -o
+```
+
+### 環境変数
+
+毎回同じフラグを指定する手間を省くため、環境変数でデフォルト値を設定できる。
+
+| 環境変数 | 説明 | 例 |
+|----------|------|-----|
+| `AWSLOGIN_DURATION` | セッション有効期間（秒, 900-43200） | `export AWSLOGIN_DURATION=7200` |
+| `AWSLOGIN_OPEN` | ブラウザで開く（`true`/`false`） | `export AWSLOGIN_OPEN=true` |
+
+コマンドライン引数は環境変数より常に優先される。
+
+```bash
+# 常に 2 時間セッション + ブラウザオープン
+export AWSLOGIN_DURATION=7200
+export AWSLOGIN_OPEN=true
+awslogin
+
+# 一時的に上書き
+awslogin -d 900
 ```
 
 ### バージョン表示

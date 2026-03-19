@@ -14,6 +14,7 @@ A CLI tool that generates AWS Management Console sign-in URLs from temporary cre
 - Generate console sign-in URLs from AWS temporary credentials
 - Open the console directly in your default browser with `--open`
 - Customize session duration with `--duration`
+- Configure defaults with environment variables (`AWSLOGIN_DURATION`, `AWSLOGIN_OPEN`)
 - Shell completion for bash and zsh
 - Cross-platform: macOS, Linux, Windows (amd64/arm64)
 
@@ -79,6 +80,27 @@ Use the `AWS_PROFILE` environment variable, same as the AWS CLI.
 ```bash
 AWS_PROFILE=production awslogin
 AWS_PROFILE=staging awslogin -o
+```
+
+### Environment variables
+
+Set defaults so you don't have to pass the same flags every time.
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `AWSLOGIN_DURATION` | Session duration in seconds (900-43200) | `export AWSLOGIN_DURATION=7200` |
+| `AWSLOGIN_OPEN` | Open URL in browser (`true`/`false`) | `export AWSLOGIN_OPEN=true` |
+
+Command-line flags always take precedence over environment variables.
+
+```bash
+# Always use 2-hour sessions and open in browser
+export AWSLOGIN_DURATION=7200
+export AWSLOGIN_OPEN=true
+awslogin
+
+# Override for a one-off
+awslogin -d 900
 ```
 
 ### Show version
