@@ -42,7 +42,7 @@ func ListProfiles(configPath string) ([]Profile, error) {
 		}
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var profiles []Profile
 	var current *Profile
