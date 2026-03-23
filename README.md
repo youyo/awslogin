@@ -17,6 +17,8 @@ A CLI tool that generates AWS Management Console sign-in URLs from temporary cre
 - Configure defaults with environment variables (`AWSLOGIN_DURATION`, `AWSLOGIN_OPEN`)
 - Shell completion for bash and zsh
 - Cross-platform: macOS, Linux, Windows (amd64/arm64)
+- JSON output on stdout/stderr — optimized for scripting and AI coding agents
+- List available AWS profiles with `awslogin list`
 
 ## Install
 
@@ -41,20 +43,28 @@ Download a binary for your OS and architecture from the [Releases page](https://
 ```bash
 # Get a sign-in URL using a named profile
 AWS_PROFILE=myprofile awslogin
+# {"result":{"url":"https://signin.aws.amazon.com/federation?...","region":"ap-northeast-1","opened_in_browser":false}}
 
 # Open it in a browser
 AWS_PROFILE=myprofile awslogin --open
+# {"result":{"url":"https://signin.aws.amazon.com/federation?...","region":"ap-northeast-1","opened_in_browser":true}}
 ```
 
 ## Usage
 
 ### Generate a sign-in URL (default)
 
-Prints the URL to stdout. Pipe it, copy it, do whatever you want.
+Prints JSON to stdout with the sign-in URL. Pipe it, extract it with jq, do whatever you want.
 
 ```bash
 awslogin
-awslogin | pbcopy  # copy to clipboard on macOS
+# {"result":{"url":"https://signin.aws.amazon.com/federation?...","region":"ap-northeast-1","opened_in_browser":false}}
+
+# Extract URL with jq
+awslogin | jq -r '.result.url'
+
+# Copy URL to clipboard on macOS
+awslogin | jq -r '.result.url' | pbcopy
 ```
 
 ### Open in browser (`--open` / `-o`)
@@ -103,10 +113,20 @@ awslogin
 awslogin -d 900
 ```
 
+### List profiles (`list`)
+
+Shows all configured AWS profiles and any active session from environment variables.
+
+```bash
+awslogin list
+# {"result":{"profiles":[{"name":"dev","type":"sso","sso_start_url":"https://...","region":"ap-northeast-1"},{"name":"prod","type":"credentials","region":"us-east-1"}],"current_session":null}}
+```
+
 ### Show version
 
 ```bash
 awslogin version
+# {"result":{"version":"v3.2.1"}}
 ```
 
 ### Shell completion
@@ -133,6 +153,28 @@ When your SSO session has expired, awslogin automatically detects the `InvalidGr
 
 **Only the modern `[sso-session]` format is supported.** Legacy profiles with a bare `sso_start_url` key will receive a migration error.
 
+## JSON Output Format
+
+All commands (except `completion`) output JSON to stdout. Events and progress are output as NDJSON to stderr.
+
+### stdout (result)
+
+```json
+{"result": {"url": "...", "region": "...", "opened_in_browser": false}}
+```
+
+### stdout (error, exit code 1)
+
+```json
+{"error": {"code": "SSO_SESSION_EXPIRED", "message": "SSO session expired", "details": "..."}}
+```
+
+### stderr (events, NDJSON)
+
+```json
+{"type": "sso_auth_required", "verification_code": "ABCD-EFGH", "verification_url": "https://..."}
+```
+
 ### Example `~/.aws/config`
 
 ```ini
@@ -149,10 +191,12 @@ sso_registration_scopes = sso:account:access
 ```
 
 ```bash
-# First run or after session expiry: browser opens automatically
+# First run or after session expiry: browser opens, then JSON output
 AWS_PROFILE=my-sso awslogin
-# SSO session expired. Starting SSO login...
-# https://signin.aws.amazon.com/federation?...
+# stderr: {"type":"sso_session_expired","message":"SSO session expired. Starting SSO login..."}
+# stderr: {"type":"sso_auth_required","verification_code":"ABCD-EFGH","verification_url":"https://..."}
+# stderr: {"type":"sso_auth_complete"}
+# stdout: {"result":{"url":"https://signin.aws.amazon.com/federation?...","region":"ap-northeast-1","opened_in_browser":false}}
 ```
 
 ## Migrating from v2
@@ -167,6 +211,7 @@ v3.0.0 includes breaking changes.
 | `--select-profile` (`-S`) | Removed | Interactive profile picker dropped |
 | `--browser` (`-b`) | Removed | Only the default browser is supported |
 | `--version` flag | `awslogin version` subcommand | Matches the Kong CLI framework convention |
+| Plain text output | JSON output | Machine-readable, optimized for scripting and AI agents |
 
 ### What changed under the hood
 
