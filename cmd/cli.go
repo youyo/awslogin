@@ -14,6 +14,7 @@ type CLI struct {
 	Globals
 
 	Login      LoginCmd      `cmd:"" default:"withargs" help:"Generate AWS console login URL."`
+	List       ListCmd       `cmd:"" help:"List available AWS profiles and current session."`
 	Version    VersionCmd    `cmd:"" help:"Show version information."`
 	Completion CompletionCmd `cmd:"" help:"Generate shell completion script."`
 }

@@ -2,10 +2,12 @@ package signin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/youyo/awslogin/internal/jsonout"
 	"github.com/youyo/awslogin/internal/sso"
 )
 
@@ -40,7 +42,7 @@ func loadCredentialsOnce(ctx context.Context) (*AWSCredentials, error) {
 // LoadCredentials は AWS SDK v2 で認証情報とリージョンを取得する。
 // AWS_PROFILE 環境変数、~/.aws/credentials、IAM ロール等、SDK の config loader が自動解決する。
 // SSO セッションが期限切れ（InvalidGrantException）の場合は OIDC デバイス認証フローを起動して再試行する。
-func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
+func LoadCredentials(ctx context.Context, events io.Writer) (*AWSCredentials, error) {
 	result, err := loadCredentialsOnce(ctx)
 	if err == nil {
 		return result, nil
@@ -62,9 +64,10 @@ func LoadCredentials(ctx context.Context) (*AWSCredentials, error) {
 		return nil, err
 	}
 
-	// SSO セッション期限切れ → OIDC デバイス認証フローを起動
-	fmt.Fprintln(os.Stderr, "SSO session expired. Starting SSO login...")
-	if loginErr := sso.Login(ctx); loginErr != nil {
+	// SSO セッション期限切れ → JSON イベント出力
+	enc := json.NewEncoder(events)
+	_ = enc.Encode(jsonout.NewSSOSessionExpiredEvent())
+	if loginErr := sso.Login(ctx, events); loginErr != nil {
 		return nil, fmt.Errorf("SSO login failed: %w", loginErr)
 	}
 

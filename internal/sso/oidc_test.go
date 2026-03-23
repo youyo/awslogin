@@ -1,8 +1,11 @@
 package sso
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -12,10 +15,10 @@ import (
 
 // mockOIDCClient は OIDCClient の mock 実装
 type mockOIDCClient struct {
-	registerClientFn         func(ctx context.Context, params *ssooidc.RegisterClientInput, optFns ...func(*ssooidc.Options)) (*ssooidc.RegisterClientOutput, error)
+	registerClientFn           func(ctx context.Context, params *ssooidc.RegisterClientInput, optFns ...func(*ssooidc.Options)) (*ssooidc.RegisterClientOutput, error)
 	startDeviceAuthorizationFn func(ctx context.Context, params *ssooidc.StartDeviceAuthorizationInput, optFns ...func(*ssooidc.Options)) (*ssooidc.StartDeviceAuthorizationOutput, error)
-	createTokenCalls         int
-	createTokenFn            func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error)
+	createTokenCalls           int
+	createTokenFn              func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error)
 }
 
 func (m *mockOIDCClient) RegisterClient(ctx context.Context, params *ssooidc.RegisterClientInput, optFns ...func(*ssooidc.Options)) (*ssooidc.RegisterClientOutput, error) {
@@ -66,7 +69,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 
 	t.Run("N1: 即成功フロー", func(t *testing.T) {
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				return &ssooidc.CreateTokenOutput{
@@ -77,7 +80,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -91,7 +94,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 
 	t.Run("N2: AuthorizationPending 2回 → 3回目成功", func(t *testing.T) {
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				if callNum <= 2 {
@@ -106,7 +109,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -120,7 +123,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 
 	t.Run("N3: SlowDown → interval 増加（フロー継続）", func(t *testing.T) {
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				if callNum == 1 {
@@ -135,7 +138,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -152,7 +155,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 		}
 
-		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -166,7 +169,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -174,7 +177,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 
 	t.Run("E3: ExpiredTokenException", func(t *testing.T) {
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				return nil, &ssooidctypes.ExpiredTokenException{
@@ -183,7 +186,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser)
+		_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, io.Discard)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -194,7 +197,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 
 		callCount := 0
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				callCount++
@@ -207,7 +210,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		_, err := RunDeviceAuthFlow(ctx, client, cfg, noBrowser)
+		_, err := RunDeviceAuthFlow(ctx, client, cfg, noBrowser, io.Discard)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -219,7 +222,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 		}
 
 		client := &mockOIDCClient{
-			registerClientFn:         defaultRegisterClient(),
+			registerClientFn:           defaultRegisterClient(),
 			startDeviceAuthorizationFn: defaultStartDeviceAuth(),
 			createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
 				return &ssooidc.CreateTokenOutput{
@@ -229,7 +232,7 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			},
 		}
 
-		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, failBrowser)
+		result, err := RunDeviceAuthFlow(context.Background(), client, cfg, failBrowser, io.Discard)
 		if err != nil {
 			t.Fatalf("expected success even with browser failure, got error: %v", err)
 		}
@@ -237,4 +240,40 @@ func TestRunDeviceAuthFlow(t *testing.T) {
 			t.Errorf("expected %q, got %q", "token-browser-failed", result.AccessToken)
 		}
 	})
+}
+
+func TestRunDeviceAuthFlow_SSOAuthRequiredEvent(t *testing.T) {
+	cfg := &SSOConfig{
+		StartURL:    "https://example.awsapps.com/start",
+		SSORegion:   "ap-northeast-1",
+		SessionName: "test-session",
+	}
+
+	var stderr bytes.Buffer
+	client := &mockOIDCClient{
+		registerClientFn:           defaultRegisterClient(),
+		startDeviceAuthorizationFn: defaultStartDeviceAuth(),
+		createTokenFn: func(callNum int, ctx context.Context, params *ssooidc.CreateTokenInput, optFns ...func(*ssooidc.Options)) (*ssooidc.CreateTokenOutput, error) {
+			return &ssooidc.CreateTokenOutput{
+				AccessToken: aws.String("test-token"),
+				ExpiresIn:   3600,
+			}, nil
+		},
+	}
+
+	_, err := RunDeviceAuthFlow(context.Background(), client, cfg, noBrowser, &stderr)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	output := stderr.String()
+	if !strings.Contains(output, `"type":"sso_auth_required"`) {
+		t.Errorf("expected sso_auth_required event in stderr, got: %s", output)
+	}
+	if !strings.Contains(output, `"verification_code":"ABCD-1234"`) {
+		t.Errorf("expected verification code in stderr, got: %s", output)
+	}
+	if !strings.Contains(output, `"type":"sso_auth_complete"`) {
+		t.Errorf("expected sso_auth_complete event in stderr, got: %s", output)
+	}
 }

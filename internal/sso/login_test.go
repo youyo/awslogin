@@ -2,6 +2,7 @@ package sso
 
 import (
 	"context"
+	"io"
 	"testing"
 )
 
@@ -13,7 +14,7 @@ func TestLoginSignature(t *testing.T) {
 	t.Setenv("AWS_CONFIG_FILE", "/nonexistent/config/file")
 	t.Setenv("AWS_PROFILE", "nonexistent-profile")
 
-	err := Login(context.Background())
+	err := Login(context.Background(), io.Discard)
 	// エラーが返ることを確認（プロファイルが存在しないため）
 	if err == nil {
 		t.Log("Login returned nil (unexpected but not fatal in test environment)")

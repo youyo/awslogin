@@ -2,14 +2,16 @@ package sso
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
+	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssooidc"
 	ssooidctypes "github.com/aws/aws-sdk-go-v2/service/ssooidc/types"
+	"github.com/youyo/awslogin/internal/jsonout"
 )
 
 const (
@@ -37,7 +39,7 @@ type DeviceAuthResult struct {
 }
 
 // RunDeviceAuthFlow は OIDC デバイス認証フローを実行する
-func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, openBrowser func(string) error) (*DeviceAuthResult, error) {
+func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, openBrowser func(string) error, events io.Writer) (*DeviceAuthResult, error) {
 	// 1. RegisterClient
 	regOut, err := client.RegisterClient(ctx, &ssooidc.RegisterClientInput{
 		ClientName: aws.String(oidcClientName),
@@ -58,18 +60,25 @@ func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, o
 		return nil, fmt.Errorf("failed to start device authorization: %w", err)
 	}
 
-	// 3. stderr に UserCode + URL 表示
-	fmt.Fprintf(os.Stderr, "\nVerification code: %s\n", aws.ToString(authOut.UserCode))
-	if authOut.VerificationUriComplete != nil {
-		fmt.Fprintf(os.Stderr, "Open this URL to authorize: %s\n\n", aws.ToString(authOut.VerificationUriComplete))
-	} else {
-		fmt.Fprintf(os.Stderr, "Open this URL and enter the code: %s\n\n", aws.ToString(authOut.VerificationUri))
+	// 3. stderr に JSON イベント出力
+	enc := json.NewEncoder(events)
+	verificationURL := aws.ToString(authOut.VerificationUriComplete)
+	verificationURLBase := aws.ToString(authOut.VerificationUri)
+	if verificationURL == "" {
+		verificationURL = verificationURLBase
 	}
+	_ = enc.Encode(jsonout.NewSSOAuthRequiredEvent(
+		aws.ToString(authOut.UserCode),
+		verificationURL,
+		verificationURLBase,
+	))
 
 	// 4. ブラウザ起動（失敗しても続行）
 	if authOut.VerificationUriComplete != nil {
 		if err := openBrowser(aws.ToString(authOut.VerificationUriComplete)); err != nil {
-			fmt.Fprintf(os.Stderr, "Could not open browser automatically. Please open the URL manually.\n")
+			_ = enc.Encode(jsonout.NewBrowserOpenFailedEvent())
+		} else {
+			_ = enc.Encode(jsonout.NewBrowserOpenedEvent(aws.ToString(authOut.VerificationUriComplete)))
 		}
 	}
 
@@ -116,6 +125,8 @@ func RunDeviceAuthFlow(ctx context.Context, client OIDCClient, cfg *SSOConfig, o
 			}
 			return nil, fmt.Errorf("failed to create token: %w", err)
 		}
+
+		_ = enc.Encode(jsonout.NewSSOAuthCompleteEvent())
 
 		return &DeviceAuthResult{
 			AccessToken:  aws.ToString(tokenOut.AccessToken),

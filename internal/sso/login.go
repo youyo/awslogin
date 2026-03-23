@@ -3,6 +3,7 @@ package sso
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
@@ -13,7 +14,7 @@ import (
 const defaultExpiresInSeconds int32 = 3600
 
 // Login は SSO OIDC デバイス認証フローを実行してトークンをキャッシュする
-func Login(ctx context.Context) error {
+func Login(ctx context.Context, events io.Writer) error {
 	cfg, err := LoadSSOConfig(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to load SSO config: %w", err)
@@ -29,7 +30,7 @@ func Login(ctx context.Context) error {
 
 	client := ssooidc.NewFromConfig(awsCfg)
 
-	result, err := RunDeviceAuthFlow(ctx, client, cfg, browse.Start)
+	result, err := RunDeviceAuthFlow(ctx, client, cfg, browse.Start, events)
 	if err != nil {
 		return err
 	}
