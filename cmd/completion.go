@@ -37,7 +37,7 @@ const bashCompletionScript = `_awslogin_completions() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    commands="version completion"
+    commands="list version completion"
     flags="--open -o --duration -d --help"
 
     case "${prev}" in
@@ -67,6 +67,7 @@ const zshCompletionScript = `#compdef awslogin
 _awslogin() {
     local -a commands
     commands=(
+        'list:List available AWS profiles and current session'
         'version:Show version information'
         'completion:Generate shell completion script'
     )
